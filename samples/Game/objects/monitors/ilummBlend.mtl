@@ -1,0 +1,8 @@
+<Material MtlFlags="524288" Shader="Illum" GenMask="100000824" StringGenMask="%ALPHAMASK_DETAILMAP%BLENDLAYER%DECAL%TESSELLATION" SurfaceType="" MatTemplate="" Diffuse="1,1,1" Specular="0,0,0" Emissive="0,0,0" Shininess="27" Opacity="1" AlphaTest="0.25">
+ <Textures>
+  <Texture Map="Diffuse" File="objects/monitors/tv_colorbars1.tif"/>
+  <Texture Map="Opacity" File="objects/monitors/bw-test-pattern2.dds"/>
+  <Texture Map="Custom" File="objects/monitors/woordparkett.tif"/>
+ </Textures>
+ <PublicParams BlendFalloff="54.099998" FresnelPower="4.388" GlossFromDiffuseContrast="1.55" BlendLayer2Tiling="0.62" BlendMaskRotation="48.200001" FresnelScale="1" GlossFromDiffuseOffset="0" FresnelBias="0.634" GlossFromDiffuseAmount="0" GlossFromDiffuseBrightness="1.13" BlendFactor="3.04" IndirectColor="0.25,0.25,0.25"/>
+</Material>

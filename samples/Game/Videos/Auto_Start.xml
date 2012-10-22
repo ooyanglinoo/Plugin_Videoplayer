@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Videoplayer>
+  <Scene Skippable="1">
+     <Input Class="InputWebM" Video="Videos\logo_cryengine3.webm">
+	<Output Class="Output2D" />
+     </Input>
+  </Scene>
+  <Scene Skippable="1">
+     <Input Class="InputWebM" Video="Videos\logo_gameware.webm">
+	<Output Class="Output2D" />
+     </Input>
+  </Scene>
+</Videoplayer>

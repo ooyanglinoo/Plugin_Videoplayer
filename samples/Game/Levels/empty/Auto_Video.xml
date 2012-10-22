@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Videoplayer>
+  <Scene Skippable="1">
+    <!--- All inputs in one scene play at the same time until all have ended or are skipped, the scene skippable overrides all others when specified -->
+    <Input Class="InputWebM" Video="Videos/logo_cryengine3.webm" Sound="" Loop="0" StartAt="0" EndAfter="0" CustomWidth="-1" CustomHeight="-1" TimeSource="3" Skippable="1">
+      <!--- All Outputs in the same Output are played at the same time and use the same image -->
+      <!--- When playlist is used with InputPlaylist FlowgraphNode then additional output nodes can be defined -->
+      <Output Class="Output2D" ResizeMode="2" CustomAR="0" Top="0" Left="0" Width="1" Height="1" Angle="0" RGBA="255,255,255,255" BackgroundRGBA="0,0,0,255" ZOrder="1" />
+    </Input>
+  </Scene>
+</Videoplayer>

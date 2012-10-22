@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Videoplayer>
+  <Scene Skippable="0">
+    <Input Class="InputWebM" Video="Videos\menu_background.webm" Loop="1" Skippable="0">
+      <Output Class="Output2D" ResizeMode="3" backgroundrgba="0,0,0,0" rgba="255,255,255,50"/>
+    </Input>
+  </Scene>
+</Videoplayer>
