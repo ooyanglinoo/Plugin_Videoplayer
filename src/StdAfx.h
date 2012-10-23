@@ -32,5 +32,14 @@
 
 #pragma warning(disable: 4018)  // conditional expression is constant
 
+// can be used to partially disable the system (used to find crash sources)
+/*
+#define VP_DISABLE_OVERRIDE // least disabled, no material manipulation
+#define VP_DISABLE_RENDER // no gpu texture updates
+#define VP_DISABLE_RESOURCE // no gpu resource creation
+#define VP_DISABLE_DECODE // no decoding
+#define VP_DISABLE_SYSTEM // most disabled, don't initialize system
+*/
+
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
