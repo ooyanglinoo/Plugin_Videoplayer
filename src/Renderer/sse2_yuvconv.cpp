@@ -135,7 +135,7 @@ namespace VideoplayerPlugin
     {
         __m128i y0r0, y0r1, u0, v0;
         __m128i y00r0, y01r0, y00r1, y01r1;
-        __m128i u00t, u00, u01, v00t, v00, v01;
+        __m128i u00, u01, v00, v01;
         __m128i rv00, rv01, gu00, gu01, gv00, gv01, bu00, bu01;
         __m128i r00, r01, g00, g01, b00, b01, a00, a01;
         __m128i rgb0123, rgb4567, rgb89ab, rgbcdef;
@@ -145,7 +145,6 @@ namespace VideoplayerPlugin
         __m128i* srcy128r0, *srcy128r1;
         __m128i* dstrgb128r0, *dstrgb128r1;
         __m64* srcu64, *srcv64;
-        __m128i tmp;
         int x, y;
 
         // Some necessary constants first
@@ -196,21 +195,14 @@ namespace VideoplayerPlugin
                 // Since using SSE2 multipliers is cheap, I expand the u and v data first and use 8 mullo instead of the obvious 4.
                 // Expanding afterwards is costly. I tried it.
 
-                // expand u and v so they're aligned with y values
-                // Interleaves the lower 8 signed or unsigned 8-bit integers in a with the lower 8 signed or unsigned 8-bit integers in b.
-                u00t = _mm_unpacklo_epi8( u0,   zero );
-                tmp  = _mm_unpacklo_epi8( u00t, zero );
+                // yuv420: expand u and v so they're aligned with y values
+                u0  = _mm_unpacklo_epi8( u0, zero );
+                u00 = _mm_sub_epi16( _mm_unpacklo_epi16( u0, u0 ), uvsub );
+                u01 = _mm_sub_epi16( _mm_unpackhi_epi16( u0, u0 ), uvsub );
 
-                u00  = _mm_sub_epi16( _mm_or_si128( tmp, _mm_slli_si128( tmp, 2 ) ), uvsub );
-                tmp  = _mm_unpackhi_epi8( u00t, zero );
-                u01  = _mm_sub_epi16( _mm_or_si128( tmp, _mm_slli_si128( tmp, 2 ) ), uvsub );
-
-                v00t = _mm_unpacklo_epi8( v0,   zero );
-                tmp  = _mm_unpacklo_epi8( v00t, zero );
-                v00  = _mm_sub_epi16( _mm_or_si128( tmp, _mm_slli_si128( tmp, 2 ) ), uvsub );
-
-                tmp  = _mm_unpackhi_epi8( v00t, zero );
-                v01  = _mm_sub_epi16( _mm_or_si128( tmp, _mm_slli_si128( tmp, 2 ) ), uvsub );
+                v0  = _mm_unpacklo_epi8( v0, zero );
+                v00 = _mm_sub_epi16( _mm_unpacklo_epi16( v0, v0 ), uvsub );
+                v01 = _mm_sub_epi16( _mm_unpackhi_epi16( v0, v0 ), uvsub );
 
                 // common factors on both rows.
                 rv00 = _mm_mullo_epi16( facrv, v00 );
