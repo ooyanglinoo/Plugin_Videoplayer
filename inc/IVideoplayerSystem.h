@@ -2,23 +2,13 @@
 
 #pragma once
 
-#include <CryExtension/CryCreateClassInstance.h>
-#include <CryExtension/ICryUnknown.h>
-#include <IEngineModule.h>
-#include <ID3DSystem.h>
+#include <IPluginD3D.h>
 #include <IRenderer.h>
-
-#define PLUGIN_CONSOLE_PREFIX "[Videoplayer_Plugin] " //!< Prefix for Logentries by this plugin
 
 #define AUTOPLAY_SPLASHSCREEN "Videos/Auto_Start.xml" //!< Automatically triggered playlist on game startup (splashscreen)
 #define AUTOPLAY_MENU "Videos/Auto_Menu.xml" //!< Automatically triggered playlist while the main menu is displayed. (menu back and foreground)
 #define AUTOPLAY_MENU_INGAME "Videos/Auto_Menu_InGame.xml" //!< Automatically triggered playlist while the menu is displayed while in game. (menu back and foreground)
 #define AUTOPLAY_LEVEL "Auto_Video.xml" //!< Automatically triggered playlist for each level loaded (Path is the same as the level/map that is loaded)
-
-#define EXTENSION_VIDEOPLAYER_SYSTEM_FILE TEXT("Plugin_Videoplayer.dll") //!< Filename of the Plugin
-
-#define EXTENSION_VIDEOPLAYER_SYSTEM "Videoplayer" //!< Filename of the Plugin
-#define EXTENSION_VIDEOPLAYER_SYSTEM_MODULE EXTENSION_VIDEOPLAYER_SYSTEM "Module"  //!< Name of the Plugin Module
 
 #define RESBASE 2 //!< Shift resolution by x in this case make resolution divisible by 4 / best however would be 4 -> 16
 #define NANOSECOND 1000000000.0f //!< Nanoseconds for internal usage 10 ^ 9
@@ -517,14 +507,12 @@ namespace VideoplayerPlugin
     * Structure for all 2D specific settings to be used together with the videoplayer interface.
     * Use IVideoplayerSystem_impl.h to initialize the plugin.
     */
-    struct IVideoplayerSystem : public ICryUnknown
+    struct IVideoplayerSystem
     {
-        CRYINTERFACE_DECLARE( IVideoplayerSystem, 0xB1C4DC106CBB48E5, 0xB9A2115A07011488 )
-
         /**
         * @brief Initialize the plugin (call once)
         */
-        virtual bool Initialize( ID3DSystem& sys ) = 0;
+        virtual bool Initialize( D3DPlugin::IPluginD3D& sys ) = 0;
 
         /**
         * @brief Create a videoplayer class
@@ -633,13 +621,4 @@ namespace VideoplayerPlugin
         */
         virtual void OverrideMaterials( IVideoplayer* pVideo ) = 0;
     };
-
-    typedef boost::shared_ptr<IVideoplayerSystem> IVideoplayerSystemPtr;
 };
-
-// Forces you to declare global VideoplayerSystem when including IVideoplayerSystem
-#ifndef VIDEOPLAYERSYSTEM_EXPORTS
-extern VideoplayerPlugin::IVideoplayerSystemPtr gVideoplayerSystem; //!< Global Videoplayersystem pointer for game link libraries.
-#else
-extern ID3DSystem* gD3DSystem; //!< D3DSystem of the D3DPlugin initialized trough the Initialitze of the Videoplayer Module
-#endif
