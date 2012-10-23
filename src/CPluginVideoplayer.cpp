@@ -6,6 +6,7 @@
 namespace VideoplayerPlugin
 {
     CPluginVideoplayer* gPlugin = NULL;
+    D3DPlugin::IPluginD3D* gD3DSystem = NULL;
 
     CPluginVideoplayer::CPluginVideoplayer()
     {

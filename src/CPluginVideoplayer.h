@@ -8,6 +8,7 @@
 #include <IPluginBase.h>
 #include <CPluginBase.hpp>
 
+#include <IPluginD3D.h>
 #include <IPluginVideoplayer.h>
 
 #define PLUGIN_NAME "Videoplayer"
@@ -80,6 +81,7 @@ namespace VideoplayerPlugin
     };
 
     extern CPluginVideoplayer* gPlugin;
+    extern D3DPlugin::IPluginD3D* gD3DSystem;
 }
 
 /**

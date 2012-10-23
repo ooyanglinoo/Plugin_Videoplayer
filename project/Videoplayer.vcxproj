@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\changelog.txt" />
     <None Include="..\authors.txt" />
     <None Include="..\license.txt" />
     <None Include="..\readme.md" />
@@ -32,8 +33,60 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\libvpx\src\nestegg\halloc\src\halloc.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\libvpx\src\nestegg\src\nestegg.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\libvpx\src\tools_common.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\src\CVideoplayerSystem.cpp" />
+    <ClCompile Include="..\src\Flownodes\CFlowVideoInputPlaylistNode.cpp" />
+    <ClCompile Include="..\src\Flownodes\CFlowVideoInputWebMNode.cpp" />
+    <ClCompile Include="..\src\Flownodes\CFlowVideoOutput2DNode.cpp" />
+    <ClCompile Include="..\src\Flownodes\CFlowVideoOutputEntityNode.cpp" />
+    <ClCompile Include="..\src\Flownodes\CFlowVideoOutputMaterialNode.cpp" />
+    <ClCompile Include="..\src\Flownodes\CFlowVideoOutputTextureNode.cpp" />
+    <ClCompile Include="..\src\Playlist\CAutoPlaylists.cpp" />
+    <ClCompile Include="..\src\Playlist\CVideoplayerPlaylist.cpp" />
+    <ClCompile Include="..\src\Renderer\CVideoRenderer.cpp" />
+    <ClCompile Include="..\src\Renderer\CVideoRendererCE3.cpp" />
+    <ClCompile Include="..\src\Renderer\CVideoRendererDX11.cpp" />
+    <ClCompile Include="..\src\Renderer\CVideoRendererDX9.cpp" />
+    <ClCompile Include="..\src\Renderer\sse2_yuvconv.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\src\Sound\CCE3SoundWrapper.cpp" />
+    <ClCompile Include="..\src\WebM\CWebMWrapper.cpp" />
+    <ClCompile Include="..\src\WebM\vpxdec_ext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\CVideoplayerSystem.h" />
+    <ClInclude Include="..\inc\IVideoplayerSystem.h" />
+    <ClInclude Include="..\src\Playlist\CAutoPlaylists.h" />
+    <ClInclude Include="..\src\Playlist\CVideoplayerPlaylist.h" />
+    <ClInclude Include="..\inc\Playlist\IVideoplayerPlaylist.h" />
+    <ClInclude Include="..\src\Renderer\CVideoRenderer.h" />
+    <ClInclude Include="..\src\Renderer\CVideoRendererCE3.h" />
+    <ClInclude Include="..\src\Renderer\CVideoRendererDX11.h" />
+    <ClInclude Include="..\src\Renderer\CVideoRendererDX9.h" />
+    <ClInclude Include="..\src\Sound\CCE3SoundWrapper.h" />
+    <ClInclude Include="..\src\WebM\CWebMWrapper.h" />
+    <ClInclude Include="..\src\WebM\vpxdec_ext.h" />
     <ClInclude Include="..\inc\IPluginVideoplayer.h" />
     <ClInclude Include="..\src\CPluginVideoplayer.h" />
     <ClInclude Include="..\src\StdAfx.h" />
@@ -144,7 +197,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\libvpx\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>cd $(ProjectDir)/../tools
@@ -173,7 +226,7 @@ stylecode.bat</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\libvpx\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>cd $(ProjectDir)/../tools
@@ -206,7 +259,7 @@ stylecode.bat</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\libvpx\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>cd $(ProjectDir)/../tools
@@ -235,7 +288,7 @@ stylecode.bat</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\libvpx\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkStatus>true</LinkStatus>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>

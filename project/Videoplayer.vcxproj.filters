@@ -16,8 +16,30 @@
     <Filter Include="Flownodes">
       <UniqueIdentifier>{3b237a41-5247-44bb-98a0-2bc5027a272e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{1a154190-8b19-4197-be32-0806358b8bf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{cee0acae-53ae-4183-bfb2-2526572ce55a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WebM">
+      <UniqueIdentifier>{0a80d408-9335-42d3-82b0-89b3f16af001}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectShow">
+      <UniqueIdentifier>{23dd8c81-a89d-43fb-8570-95d6ff22f9d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WebM\vpxdec">
+      <UniqueIdentifier>{56e6a977-f366-4f47-b258-8607f13cdaf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\helper">
+      <UniqueIdentifier>{652e6703-e1db-4917-9571-2eeac56b8fe7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Playlist">
+      <UniqueIdentifier>{f4f813cf-f561-4435-b97b-571f319a91dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\changelog.txt" />
     <None Include="..\readme.md" />
     <None Include="..\license.txt" />
     <None Include="..\authors.txt" />
@@ -32,6 +54,66 @@
     <ClCompile Include="..\src\CPluginVideoplayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\CVideoplayerSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Flownodes\CFlowVideoInputPlaylistNode.cpp">
+      <Filter>Flownodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Flownodes\CFlowVideoInputWebMNode.cpp">
+      <Filter>Flownodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Flownodes\CFlowVideoOutput2DNode.cpp">
+      <Filter>Flownodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Flownodes\CFlowVideoOutputEntityNode.cpp">
+      <Filter>Flownodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Flownodes\CFlowVideoOutputMaterialNode.cpp">
+      <Filter>Flownodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Flownodes\CFlowVideoOutputTextureNode.cpp">
+      <Filter>Flownodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Playlist\CAutoPlaylists.cpp">
+      <Filter>Playlist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Playlist\CVideoplayerPlaylist.cpp">
+      <Filter>Playlist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Renderer\CVideoRenderer.cpp">
+      <Filter>Renderer\helper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Renderer\sse2_yuvconv.cpp">
+      <Filter>Renderer\helper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Renderer\CVideoRendererCE3.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Renderer\CVideoRendererDX11.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Renderer\CVideoRendererDX9.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Sound\CCE3SoundWrapper.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libvpx\src\nestegg\halloc\src\halloc.c">
+      <Filter>WebM\vpxdec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libvpx\src\nestegg\src\nestegg.c">
+      <Filter>WebM\vpxdec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libvpx\src\tools_common.c">
+      <Filter>WebM\vpxdec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\WebM\vpxdec_ext.cpp">
+      <Filter>WebM\vpxdec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\WebM\CWebMWrapper.cpp">
+      <Filter>WebM</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\StdAfx.h">
@@ -43,8 +125,44 @@
     <ClInclude Include="..\inc\IPluginVideoplayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\CVideoplayerSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\IVideoplayerSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Playlist\CAutoPlaylists.h">
+      <Filter>Playlist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Playlist\CVideoplayerPlaylist.h">
+      <Filter>Playlist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\Playlist\IVideoplayerPlaylist.h">
+      <Filter>Playlist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Renderer\CVideoRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Renderer\CVideoRendererCE3.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Renderer\CVideoRendererDX11.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Renderer\CVideoRendererDX9.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Sound\CCE3SoundWrapper.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\WebM\vpxdec_ext.h">
+      <Filter>WebM\vpxdec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\WebM\CWebMWrapper.h">
+      <Filter>WebM</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
