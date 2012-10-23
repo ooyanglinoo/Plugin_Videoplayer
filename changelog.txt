@@ -1,3 +1,19 @@
+Videoplayer Plugin 1.6.2 (29.10.2012)
+---------------------
+Stable Release for 32/64 bit FreeSDK 3.4 (DX9 & DX11)
+
+Known Limitations:
+- Plugin is partly disabled in 32bit Launcher when using DX11
+- Known DX11 CryEngine3 FreeSDK 3.4 Bug (don't reload your map)
+
+New:
+- Now using the Plugin SDK
+- Full sourcecode avaible under BSD-2 clause license
+- Support for playlist commands like loading a map as menu background
+
+Changes:
+- Improved SSE2 YUV Conversion
+
 Videoplayer Plugin 1.6.1 (07.09.2012)
 ---------------------
 Stable Release for 32/64 bit FreeSDK 3.4 (DX9 & DX11)
