@@ -1,0 +1,49 @@
+# ../src/configure --target=x86_64-win64-vs9 --enable-static-msvcrt --enable-install-srcs --enable-codec-srcs --enable-debug --enable-debug-libs
+Configuring selected codecs
+  enabling vp8_encoder
+  enabling vp8_decoder
+Configuring for target 'x86_64-win64-vs9'
+  enabling x86_64
+  enabling runtime_cpu_detect
+  enabling mmx
+  enabling sse
+  enabling sse2
+  enabling sse3
+  enabling ssse3
+  enabling sse4_1
+  using yasm
+check_cflags -g
+check_cc -g
+BEGIN /tmp/vpx-conf-4008-3839.c
+    1	int x;
+END /tmp/vpx-conf-4008-3839.c
+-g -c -o /tmp/vpx-conf-4008-9255.o /tmp/vpx-conf-4008-3839.c
+../src/build/make/configure.sh: line 270: -g: command not found
+check_cflags -O3
+check_cc -O3
+BEGIN /tmp/vpx-conf-4008-3839.c
+    1	int x;
+END /tmp/vpx-conf-4008-3839.c
+-O3 -c -o /tmp/vpx-conf-4008-9255.o /tmp/vpx-conf-4008-3839.c
+../src/build/make/configure.sh: line 270: -O3: command not found
+check_cc
+BEGIN /tmp/vpx-conf-4008-3839.c
+    1	    unsigned int e = 'O'<<24 | '2'<<16 | 'B'<<8 | 'E';
+END /tmp/vpx-conf-4008-3839.c
+-c -o /tmp/vpx-conf-4008-9255.o /tmp/vpx-conf-4008-3839.c
+../src/build/make/configure.sh: line 270: -c: command not found
+check_header unistd.h
+check_cpp
+BEGIN /tmp/vpx-conf-4008-3839.c
+    1	#include "unistd.h"
+    2	int x;
+END /tmp/vpx-conf-4008-3839.c
+-o /tmp/vpx-conf-4008-9255.o /tmp/vpx-conf-4008-3839.c
+../src/build/make/configure.sh: line 270: -E: command not found
+  disabling ccache
+  enabling postproc
+fake_check_header stdio.h
+fake_check_header stdint.h
+fake_check_header pthread.h
+fake_check_header sys/mman.h
+fake_check_header vpx/vpx_integer.h -I../src
