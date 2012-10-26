@@ -377,6 +377,7 @@ finished:
         }
     };
 
+    // TODO: Keep watching http://code.google.com/p/webm/issues/detail?id=162
     void updateVideoResources( eRendererType nType )
     {
         Concurrency::critical_section::scoped_lock lock( csVideoResources );
