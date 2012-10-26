@@ -46,6 +46,7 @@
 namespace VideoplayerPlugin
 {
     typedef __m128i& rtd;
+    typedef __m128i*& rtdp;
 
     inline void calcRows(
         rtd y00, rtd y01, // all
@@ -123,6 +124,79 @@ namespace VideoplayerPlugin
         rgba2 = _mm_unpackhi_epi16( gbgb, b );  // abgr ... (high)
     }
 
+#undef PARAMS
+#define PARAMS \
+    rtd y00r0, rtd y01r0, \
+    rtd rv00, rtd rv01, \
+    rtd gu00, rtd gv00, \
+    rtd gu01, rtd gv01, \
+    rtd bu00, rtd bu01, \
+    rtd r00, rtd r01, \
+    rtd g00, rtd g01, \
+    rtd b00, rtd b01, \
+    rtd a00, rtd a01, \
+    rtd rgb0123, rtd rgb4567, \
+    rtd rgb89ab, rtd rgbcdef, \
+    rtd ggbb, rtd gbgb, \
+    SAlphaGenParam& ap, \
+    rtdp dstrgb128
+
+    template<eByteOrder COLOR_DST_FMT, eAlphaMode ALPHAMODE>
+    inline void processRow( PARAMS )
+    {
+        // row 0
+
+        // Now it's trivial to calculate the r/g/b planar values by summing things together as specified and shifting down by 6,
+        // the multiplier we used on the factors.
+        calcRows(
+            y00r0, y01r0, //all
+            rv00,   rv01, // r
+            gu00, gv00, gu01, gv01, // g
+            bu00, bu01, // b
+            r00, r01, g00, g01, b00, b01 // result
+        );
+
+        // calculate alpha
+        calcAlpha<ALPHAMODE>(
+            r00, g00, b00,
+            a00,
+            ap
+        );
+
+        calcAlpha<ALPHAMODE>(
+            r01, g01, b01,
+            a01,
+            ap
+        );
+
+        // The remaining challenge is saturating and packing the results into chunky pixels efficiently.
+        packResult<COLOR_DST_FMT>(
+            r00, // r
+            g00, // g
+            b00, // b
+            a00, // alpha
+            rgb0123, rgb4567, // result
+            ggbb, gbgb // temp
+        );
+
+        packResult<COLOR_DST_FMT>(
+            r01, // r
+            g01, // g
+            b01, // b
+            a01, // alpha
+            rgb89ab, rgbcdef, // result
+            ggbb, gbgb // temp
+        );
+
+        // Store the finished 16 pixels
+        _mm_store_si128( dstrgb128++, rgb0123 );
+        _mm_store_si128( dstrgb128++, rgb4567 );
+        _mm_store_si128( dstrgb128++, rgb89ab );
+        _mm_store_si128( dstrgb128++, rgbcdef );
+        // That concludes the work necessary for row 0.
+    }
+
+
     // orginal from yuv420_to_rgba8888 : http://www.ignorantus.com/yuv2rgb_sse2/index.html
 #undef PARAMS
 #define PARAMS uint8_t *yp, uint8_t *up, uint8_t *vp, \
@@ -164,6 +238,7 @@ namespace VideoplayerPlugin
 
         for ( y = 0; y < height; y += 2 )
         {
+            // TODO can be optimized to use previous res
             srcy128r0 = ( __m128i* )( yp + sy * y );
             srcy128r1 = ( __m128i* )( yp + sy * y + sy );
             srcu64 = ( __m64* )( up + suv * ( y / 2 ) );
@@ -176,9 +251,9 @@ namespace VideoplayerPlugin
             {
                 // We start off by loading 8 bytes of data from u and v, and 16 from the two y rows. So we're processing 32 pixels at a time.
                 u0 = _mm_loadl_epi64( ( __m128i* )srcu64 );
-                srcu64++;
+                ++srcu64;
                 v0 = _mm_loadl_epi64( ( __m128i* )srcv64 );
-                srcv64++;
+                ++srcv64;
 
                 y0r0 = _mm_load_si128( srcy128r0++ );
                 y0r1 = _mm_load_si128( srcy128r1++ );
@@ -215,107 +290,10 @@ namespace VideoplayerPlugin
                 bu01 = _mm_mullo_epi16( facbu, u01 );
 
                 // row 0
+                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r0, y01r0, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ggbb, gbgb, ap, dstrgb128r0 );
 
-                // Now it's trivial to calculate the r/g/b planar values by summing things together as specified and shifting down by 6,
-                // the multiplier we used on the factors.
-                calcRows(
-                    y00r0, y01r0, //all
-                    rv00,   rv01, // r
-                    gu00, gv00, gu01, gv01, // g
-                    bu00, bu01, // b
-                    r00, r01, g00, g01, b00, b01 // result
-                );
-
-                // calculate alpha
-                calcAlpha<ALPHAMODE>(
-                    r00, g00, b00,
-                    a00,
-                    ap
-                );
-
-                calcAlpha<ALPHAMODE>(
-                    r01, g01, b01,
-                    a01,
-                    ap
-                );
-
-                // The remaining challenge is saturating and packing the results into chunky pixels efficiently.
-                packResult<COLOR_DST_FMT>(
-                    r00, // r
-                    g00, // g
-                    b00, // b
-                    a00, // alpha
-                    rgb0123, rgb4567, // result
-                    ggbb, gbgb // temp
-                );
-
-                packResult<COLOR_DST_FMT>(
-                    r01, // r
-                    g01, // g
-                    b01, // b
-                    a01, // alpha
-                    rgb89ab, rgbcdef, // result
-                    ggbb, gbgb // temp
-                );
-
-                // Store the finished 16 pixels
-                _mm_store_si128( dstrgb128r0++, rgb0123 );
-                _mm_store_si128( dstrgb128r0++, rgb4567 );
-                _mm_store_si128( dstrgb128r0++, rgb89ab );
-                _mm_store_si128( dstrgb128r0++, rgbcdef );
-                // That concludes the work necessary for row 0.
-
-                // Repeat the last steps for row 1, replacing the y values and target pointer, and we're done.
                 // row 1
-
-                // Now it's trivial to calculate the r/g/b planar values by summing things together as specified and shifting down by 6,
-                // the multiplier we used on the factors.
-                calcRows(
-                    y00r1, y01r1, //all
-                    rv00,   rv01, // r
-                    gu00, gv00, gu01, gv01, // g
-                    bu00, bu01, // b
-                    r00, r01, g00, g01, b00, b01 // result
-                );
-
-                // calculate alpha
-                calcAlpha<ALPHAMODE>(
-                    r00, g00, b00,
-                    a00,
-                    ap
-                );
-
-                calcAlpha<ALPHAMODE>(
-                    r01, g01, b01,
-                    a01,
-                    ap
-                );
-
-                // The remaining challenge is saturating and packing the results into chunky pixels efficiently.
-                packResult<COLOR_DST_FMT>(
-                    r00, // r
-                    g00, // g
-                    b00, // b
-                    a00, // alpha
-                    rgb0123, rgb4567, // result
-                    ggbb, gbgb // temp
-                );
-
-                packResult<COLOR_DST_FMT>(
-                    r01, // r
-                    g01, // g
-                    b01, // b
-                    a01, // alpha
-                    rgb89ab, rgbcdef, // result
-                    ggbb, gbgb // temp
-                );
-
-                // Store the finished 16 pixels for row 1
-                _mm_store_si128( dstrgb128r1++, rgb0123 );
-                _mm_store_si128( dstrgb128r1++, rgb4567 );
-                _mm_store_si128( dstrgb128r1++, rgb89ab );
-                _mm_store_si128( dstrgb128r1++, rgbcdef );
-                // That concludes the work necessary for row 1.
+                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r1, y01r1, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ggbb, gbgb, ap, dstrgb128r1 );
             }
         }
     }
@@ -325,14 +303,14 @@ namespace VideoplayerPlugin
         // force the compiler to include these template variations
         SAlphaGenParam d;
         SSE2_YUV420_2_<VBO_RGBA, VAM_FILL>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_RGBA, VAM_PASSTROUGH>( 0, 0, 0,   0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_RGBA, VAM_FALLOF>( 0, 0, 0,   0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_RGBA, VAM_COLORMASK>( 0, 0, 0,   0, 0, 0, 0, 0, 0, d );
+        SSE2_YUV420_2_<VBO_RGBA, VAM_PASSTROUGH>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
+        SSE2_YUV420_2_<VBO_RGBA, VAM_FALLOF>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
+        SSE2_YUV420_2_<VBO_RGBA, VAM_COLORMASK>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
 
         SSE2_YUV420_2_<VBO_BGRA, VAM_FILL>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_BGRA, VAM_PASSTROUGH>( 0, 0, 0,   0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_BGRA, VAM_FALLOF>( 0, 0, 0,   0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_BGRA, VAM_COLORMASK>( 0, 0, 0,   0, 0, 0, 0, 0, 0, d );
+        SSE2_YUV420_2_<VBO_BGRA, VAM_PASSTROUGH>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
+        SSE2_YUV420_2_<VBO_BGRA, VAM_FALLOF>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
+        SSE2_YUV420_2_<VBO_BGRA, VAM_COLORMASK>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
     }
 
 }
