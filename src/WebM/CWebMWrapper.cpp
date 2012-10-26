@@ -723,7 +723,7 @@ namespace VideoplayerPlugin
                 // read until one frame to be rendered is left (drop data) or the max drop duration is reached
                 while ( uFrames > 1 && uMaxDrop > 0 )
                 {
-                    // TODO: see http://code.google.com/p/webm/issues/detail?id=471 
+                    // TODO: see http://code.google.com/p/webm/issues/detail?id=471
                     //m_decoder.readFrame( NULL, bDirty, m_eDM & VDM_Drop, m_eDM & VDM_DropOutput ); // drop frame
                     m_decoder.readFrame( NULL, bDirty, false, true ); // drop frame
                     --uFrames;
