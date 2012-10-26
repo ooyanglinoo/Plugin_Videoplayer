@@ -76,7 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\CVideoplayerSystem.h" />
-    <ClInclude Include="..\inc\IVideoplayerSystem.h" />
+    <ClInclude Include="..\inc\IPluginVideoplayer.h" />
     <ClInclude Include="..\src\Playlist\CAutoPlaylists.h" />
     <ClInclude Include="..\src\Playlist\CVideoplayerPlaylist.h" />
     <ClInclude Include="..\inc\Playlist\IVideoplayerPlaylist.h" />
@@ -87,7 +87,6 @@
     <ClInclude Include="..\src\Sound\CCE3SoundWrapper.h" />
     <ClInclude Include="..\src\WebM\CWebMWrapper.h" />
     <ClInclude Include="..\src\WebM\vpxdec_ext.h" />
-    <ClInclude Include="..\inc\IPluginVideoplayer.h" />
     <ClInclude Include="..\src\CPluginVideoplayer.h" />
     <ClInclude Include="..\src\StdAfx.h" />
     <ClInclude Include="resource.h" />

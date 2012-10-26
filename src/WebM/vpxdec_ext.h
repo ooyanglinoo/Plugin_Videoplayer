@@ -12,7 +12,7 @@
 #include <vpx/vp8dx.h>
 #endif
 
-#include <IVideoplayerSystem.h>
+#include <IPluginVideoplayer.h>
 
 #include <tools_common.h>
 #include <nestegg/include/nestegg/nestegg.h>

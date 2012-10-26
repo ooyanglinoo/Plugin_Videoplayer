@@ -2,6 +2,7 @@
 
 #include <StdAfx.h>
 #include <CPluginVideoplayer.h>
+#include <CVideoplayerSystem.h>
 
 namespace VideoplayerPlugin
 {
@@ -11,6 +12,8 @@ namespace VideoplayerPlugin
     CPluginVideoplayer::CPluginVideoplayer()
     {
         gPlugin = this;
+        gVideoplayerSystem = NULL;
+        gD3DSystem = NULL;
     }
 
     CPluginVideoplayer::~CPluginVideoplayer()
@@ -18,6 +21,8 @@ namespace VideoplayerPlugin
         Release( true );
 
         gPlugin = NULL;
+        gVideoplayerSystem = NULL;
+        gD3DSystem = NULL;
     }
 
     bool CPluginVideoplayer::Release( bool bForce )
@@ -33,19 +38,10 @@ namespace VideoplayerPlugin
             {
                 // Depending on your plugin you might not want to unregister anything
                 // if the System is quitting.
-                if ( gEnv && gEnv->pSystem && !gEnv->pSystem->IsQuitting() )
+                if ( gVideoplayerSystem )
                 {
-                    // Unregister CVars
-                    if ( gEnv && gEnv->pConsole )
-                    {
-                        // ...
-                    }
-
-                    // Unregister game objects
-                    if ( gEnv && gEnv->pGameFramework && gEnv->pGame )
-                    {
-                        // ...
-                    }
+                    delete gVideoplayerSystem;
+                    gVideoplayerSystem = NULL;
                 }
 
                 // Cleanup like this always (since the class is static its cleaned up when the dll is unloaded)
@@ -66,24 +62,24 @@ namespace VideoplayerPlugin
 
         if ( gEnv && gEnv->pSystem && !gEnv->pSystem->IsQuitting() )
         {
-            // Register CVars/Commands
-            if ( gEnv && gEnv->pConsole )
-            {
-                // TODO: Register CVARs/Commands here if you have some
-                // ...
-            }
-
-            // Register Game Objects
-            if ( gEnv && gEnv->pGameFramework )
-            {
-                // TODO: Register Game Objects here if you have some
-                // ...
-            }
+            gVideoplayerSystem = new CVideoplayerSystem();
         }
 
         // Note: Autoregister Flownodes will be automatically registered
 
         return true;
+    }
+
+    bool CPluginVideoplayer::InitDependencies()
+    {
+        if ( gEnv && gEnv->pSystem && !gEnv->pSystem->IsQuitting() && gVideoplayerSystem )
+        {
+            gD3DSystem = PluginManager::safeGetPluginConcreteInterface<D3DPlugin::IPluginD3D*>( "D3D" );
+
+            gVideoplayerSystem->Initialize();
+        }
+
+        return CPluginBase::InitDependencies();
     }
 
     const char* CPluginVideoplayer::ListCVars() const
@@ -96,5 +92,8 @@ namespace VideoplayerPlugin
         return "OK";
     }
 
-    // TODO: Add your plugin concrete interface implementation
+    void* CPluginVideoplayer::GetConcreteInterface( const char* sInterfaceVersion )
+    {
+        return static_cast < IPluginVideoplayer* > ( gVideoplayerSystem );
+    };
 }

@@ -3,7 +3,7 @@
 #include <StdAfx.h>
 #include <Nodes/G2FlowBaseNode.h>
 #include <CPluginVideoplayer.h>
-#include <IVideoplayerSystem.h>
+#include <IPluginVideoplayer.h>
 #include <CVideoplayerSystem.h>
 
 namespace VideoplayerPlugin

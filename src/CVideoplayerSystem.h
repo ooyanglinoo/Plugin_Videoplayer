@@ -3,7 +3,8 @@
 #pragma once
 
 #include <Game.h>
-#include "IVideoplayerSystem.h"
+#include <IPluginD3D.h>
+#include "IPluginVideoplayer.h"
 #include <map>
 #include <Playlist/CAutoPlaylists.h>
 
@@ -11,7 +12,7 @@ namespace VideoplayerPlugin
 {
     /**
     * @brief Structure to hold material override information
-    * Is used internally to restore materials on videoends/resets...
+    * Is used internally to restore materials on video ends/resets...
     */
     typedef struct SMaterialOverride_
     {
@@ -40,8 +41,8 @@ namespace VideoplayerPlugin
         * @brief Fill the structure with new parameters
         * @param _pVideo pointer to the source video interface
         * @param _pMaterial pointer to the material interface affected
-        * @param _nTextureslot textureslot to be overriden
-        * @param _bRecommendedSettings automaticall set some shader parameters
+        * @param _nTextureslot texture slot to be overridden
+        * @param _bRecommendedSettings automatically set some shader parameters
         */
         void Set( IVideoplayer* _pVideo, IMaterial* _pMaterial, int _nTextureslot = EFTT_DIFFUSE, bool _bRecommendedSettings = true )
         {
@@ -60,7 +61,7 @@ namespace VideoplayerPlugin
     typedef std::map<IVideoplayerPlaylist*, IVideoplayerPlaylist*> tVideoPlaylistMap; //!< simply for simpler loopkup
 
     /**
-    * @brief Type to identifiy what is currently displayed on the screen.
+    * @brief Type to identify what is currently displayed on the screen.
     * This type is based on the old CryEngine Bitmap classes.
     */
     typedef enum
@@ -81,7 +82,7 @@ namespace VideoplayerPlugin
     * Also this class redirects D3D events to the resource specific classes.
     */
     class CVideoplayerSystem :
-        public IVideoplayerSystem,
+        public IPluginVideoplayer,
         public D3DPlugin::ID3DEventListener,
         public ILevelSystemListener,
         public IGameFrameworkListener,
@@ -96,6 +97,8 @@ namespace VideoplayerPlugin
             CVideoplayerSystem();
             ~CVideoplayerSystem();
 
+            PluginManager::IPluginBase* GetBase();
+
         public:
             bool m_bEditing; //!< Editor is in editing mode
 
@@ -107,7 +110,7 @@ namespace VideoplayerPlugin
             float vp_dropmaxduration; //!< Maximal duration to drop at one time before outputting a frame again
 
         private:
-            void* m_pDevice; //!< d3d device pointer
+
             int m_nFreeVideoId; //!< next video ID / free ID (could overflow in an extremly unlikly use case of creating 2^31-1 videos)
             tVideoIDMap m_pVideos; //!< videoid 1;1 video interface relation
             tVideoPlaylistMap m_pPlaylists; //!< simply for simpler loopkup and cleanup
@@ -211,9 +214,9 @@ namespace VideoplayerPlugin
             */
             bool IsD3DActive();
 
-            // see IVideoplayerSystem
-            bool Initialize( D3DPlugin::IPluginD3D& sys );
-            IVideoplayer* CreateVideoplayer();
+            // see IPluginVideoplayer
+            bool Initialize( );
+            IVideoplayer* CreateVideoplayer( const char* sType = "WebM" );
             void DeleteVideoplayer( IVideoplayer* pVideoplayer );
             IVideoplayer* GetVideoplayerById( int nVideoID = -1 );
 

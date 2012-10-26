@@ -1,7 +1,7 @@
 /* Videoplayer_Plugin - for licensing and copyright see license.txt */
 
 #include <Game.h>
-#include <IVideoplayerSystem.h>
+#include <IPluginVideoplayer.h>
 
 #include <CVideoplayerSystem.h>
 #include <WebM/vpxdec_ext.h>

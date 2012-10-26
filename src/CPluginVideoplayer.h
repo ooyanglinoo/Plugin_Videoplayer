@@ -20,8 +20,7 @@ namespace VideoplayerPlugin
     * @brief Provides information and manages the resources of this plugin.
     */
     class CPluginVideoplayer :
-        public PluginManager::CPluginBase,
-        public IPluginVideoplayer
+        public PluginManager::CPluginBase
     {
         public:
             CPluginVideoplayer();
@@ -36,6 +35,8 @@ namespace VideoplayerPlugin
             };
 
             bool Init( SSystemGlobalEnvironment& env, SSystemInitParams& startupParams, IPluginBase* pPluginManager, const char* sPluginDirectory );
+
+            bool InitDependencies();
 
             const char* GetVersion() const
             {
@@ -66,18 +67,12 @@ namespace VideoplayerPlugin
                 return "1.0";
             };
 
-            void* GetConcreteInterface( const char* sInterfaceVersion )
-            {
-                return static_cast < IPluginVideoplayer* > ( this );
-            };
+            void* GetConcreteInterface( const char* sInterfaceVersion );
 
-            // IPluginVideoplayer
-            IPluginBase* GetBase()
+            PluginManager::IPluginBase* GetBase()
             {
-                return static_cast<IPluginBase*>( this );
+                return static_cast<PluginManager::IPluginBase*>( this );
             };
-
-            // TODO: Add your concrete interface implementation
     };
 
     extern CPluginVideoplayer* gPlugin;

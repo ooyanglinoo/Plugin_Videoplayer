@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <IVideoplayerSystem.h>
+#include <IPluginVideoplayer.h>
 
 namespace VideoplayerPlugin
 {

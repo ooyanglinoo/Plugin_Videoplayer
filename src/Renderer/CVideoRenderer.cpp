@@ -312,6 +312,11 @@ namespace VideoplayerPlugin
 
         IVideoRenderer* pRet = NULL;
 
+        if ( !gD3DSystem )
+        {
+            eType = VRT_CE3;
+        }
+
         switch ( eType )
         {
             case VRT_AUTO:
@@ -377,7 +382,7 @@ finished:
         Concurrency::critical_section::scoped_lock lock( csVideoResources );
 
         // TODO: 32 bit DX11 Version will crash if this takes longer then 2-3 ms ingame so disable this for now.
-        if ( sizeof( void* ) == 4 && gD3DSystem->GetType() == D3DPlugin::D3D_DX11 && nType == VRT_CE3 && gVideoplayerSystem->GetScreenState() == eSS_InGameScreen )
+        if ( sizeof( void* ) == 4 && gEnv->pRenderer->GetRenderType() == eRT_DX11 && nType == VRT_CE3 && gVideoplayerSystem->GetScreenState() == eSS_InGameScreen )
         {
             return;
         }

@@ -28,5 +28,4 @@ namespace VideoplayerPlugin
 
             virtual void RenderFrame( void* pData );
     };
-
 }

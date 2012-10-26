@@ -2,18 +2,18 @@
 
 #include <StdAfx.h>
 #include <CVideoplayerSystem.h>
+#include <CPluginVideoplayer.h>
 #include <WebM/CWebMWrapper.h>
 #include <Playlist/CVideoplayerPlaylist.h>
 
 VideoplayerPlugin::CVideoplayerSystem* gVideoplayerSystem = NULL;
-D3DPlugin::IPluginD3D* gD3DSystem = NULL;
 
 namespace VideoplayerPlugin
 {
     CVideoplayerSystem::CVideoplayerSystem()
     {
         // Reset data
-        m_pDevice = NULL;
+
         m_pAutoPlaylists = NULL;
         m_pOnlySkipFilter = NULL;
         gVideoplayerSystem = this;
@@ -56,17 +56,27 @@ namespace VideoplayerPlugin
             ReleaseMaterials(); // Reset/Release also the Engine Materials
 
             // Remove Listeners so that there are no calls into deleted system
-            gEnv->pSystem->GetISystemEventDispatcher()->RemoveListener( this );
+            gEnv->pGameFramework->UnregisterListener( this );
 
-            if ( gEnv->pGameFramework )
+            ISystemEventDispatcher* pDispatcher = gEnv->pSystem->GetISystemEventDispatcher();
+
+            if ( pDispatcher )
             {
-                gEnv->pGameFramework->UnregisterListener( this );
-                gEnv->pGameFramework->GetILevelSystem()->RemoveListener( this );
+                pDispatcher->RemoveListener( this );
             }
 
-            if ( gEnv->pGame )
+            ILevelSystem* pLevelSystem = gEnv->pGameFramework->GetILevelSystem();
+
+            if ( pLevelSystem )
             {
-                gEnv->pGame->GetIGameFramework()->GetIActionMapManager()->RemoveExtraActionListener( this );
+                pLevelSystem->RemoveListener( this );
+            }
+
+            IActionMapManager* pAMManager = gEnv->pGameFramework->GetIActionMapManager();
+
+            if ( pAMManager )
+            {
+                pAMManager->RemoveExtraActionListener( this );
             }
 
             // unregister cvars
@@ -79,6 +89,11 @@ namespace VideoplayerPlugin
             }
         }
     }
+
+    PluginManager::IPluginBase* CVideoplayerSystem::GetBase()
+    {
+        return static_cast<PluginManager::IPluginBase*>( gPlugin );
+    };
 
     void CVideoplayerSystem::OnPreReset()
     {
@@ -188,7 +203,7 @@ namespace VideoplayerPlugin
 
     bool CVideoplayerSystem::IsD3DActive()
     {
-        return m_nD3DActive > 0;
+        return gD3DSystem && m_nD3DActive > 0;
     }
 
     void CVideoplayerSystem::AdvanceAll( float fDeltaTime )
@@ -309,7 +324,10 @@ namespace VideoplayerPlugin
 
     void CVideoplayerSystem::OnPreRender()
     {
-        gD3DSystem->ActivateEventDispatcher( true ); // reinstall hooks when removed
+        if ( gD3DSystem )
+        {
+            gD3DSystem->ActivateEventDispatcher( true );    // reinstall hooks when removed
+        }
 
         // decrement activity detectors
         if ( --m_nD3DActive < 0 )
@@ -367,7 +385,15 @@ namespace VideoplayerPlugin
         }
 
         // mark game loop as active (dx11 mode needs more since its called multiple times per frame atm)
-        m_nGameLoopActive = gD3DSystem->GetType() == D3DPlugin::D3D_DX9 ? 5 : 200;
+        if ( gD3DSystem )
+        {
+            m_nGameLoopActive = gD3DSystem->GetType() == D3DPlugin::D3D_DX9 ? 5 : 200;
+        }
+
+        else
+        {
+            m_nGameLoopActive = 5;
+        }
 
         if ( IsGameLoopActive() )
         {
@@ -376,6 +402,12 @@ namespace VideoplayerPlugin
             // do the rendering here (normal way)
             AdvanceAll( m_fFrameTime );
             m_fFrameTime = 0;
+
+            if ( !gD3DSystem )
+            {
+                // This is the fallback without D3D Plugin
+                updateVideoResources( VRT_CE3 );
+            }
 
             DrawAll(); // do the draw call (preferred place)
         }
@@ -508,39 +540,108 @@ namespace VideoplayerPlugin
         return m_bBlocked;
     }
 
-    bool CVideoplayerSystem::Initialize( D3DPlugin::IPluginD3D& sys )
+    bool CVideoplayerSystem::Initialize()
     {
 #if defined(VP_DISABLE_SYSTEM)
         return false;
 #endif
 
         // initialize the singleton system that require already initialized D3DSystem and GameFramework
-        gD3DSystem = &sys;
-        m_pDevice = gD3DSystem->GetDevice();
+        if ( gD3DSystem )
+        {
+            gD3DSystem->GetDevice(); // start search if isnt already found
+
+            // register listener
+            gD3DSystem->RegisterListener( this );
+        }
+
+        else
+        {
+            gPlugin->LogWarning( "D3D Plugin not found, using fallbacks, some features might not work or be slower" );
+        }
+
+        if ( gEnv )
+        {
+            // register listeners
+            if ( gEnv->pGameFramework )
+            {
+                gEnv->pGameFramework->RegisterListener( this, "Video", eFLPriority_Menu );
+
+                ISystemEventDispatcher* pDispatcher = gEnv->pSystem->GetISystemEventDispatcher();
+
+                if ( pDispatcher )
+                {
+                    pDispatcher->RegisterListener( this );
+                }
+
+                else
+                {
+                    gPlugin->LogError( "ISystemEventDispatcher == NULL" );
+                }
+
+                ILevelSystem* pLevelSystem = gEnv->pGameFramework->GetILevelSystem();
+
+                if ( pLevelSystem )
+                {
+                    pLevelSystem->AddListener( this );
+                }
+
+                else
+                {
+                    gPlugin->LogError( "ILevelSystem == NULL" );
+                }
+
+                IActionMapManager* pAMManager = gEnv->pGameFramework->GetIActionMapManager();
+
+                if ( pAMManager )
+                {
+                    pAMManager->AddExtraActionListener( this );
+
+                    // register filters //TODO
+                    m_pOnlySkipFilter = gEnv->pGameFramework->GetIActionMapManager()->CreateActionFilter( "video_onlyskip", eAFT_ActionPass );
+
+                    //m_pOnlySkipFilter->Filter("ui_skip_video");
+                    //m_pOnlySkipFilter->Enable(true);
+                }
+
+                else
+                {
+                    gPlugin->LogError( "IActionMapManager == NULL" );
+                }
+            }
+
+            else
+            {
+                gPlugin->LogError( "IGameFramework == NULL" );
+            }
+
+            if ( gEnv->pConsole )
+            {
+                // register cvars
+                REGISTER_CVAR( vp_playbackmode, VPM_Default, VF_NULL, "don't restore material in editor mode (0=restore,1=pause,2=play)" );
+                REGISTER_CVAR( vp_seekthreshold, SEEK_THRESHOLD, VF_NULL, "threshold in seconds after which seeks will be triggered" );
+                REGISTER_CVAR( vp_dropthreshold, DROP_THRESHOLD, VF_NULL, "threshold in seconds after which drops will be triggered" );
+                REGISTER_CVAR( vp_dropmaxduration, DROP_MAXDURATION, VF_NULL, "maximal duration to drop at one time before outputting a frame again" );
+            }
+
+            else
+            {
+                gPlugin->LogError( "IConsole == NULL" );
+            }
+        }
+
+        else
+        {
+            gPlugin->LogError( "gEnv == NULL" );
+        }
+
+        // Auto Playlist
         m_pAutoPlaylists = new CAutoPlaylists();
-
-        // register listeners
-        gD3DSystem->RegisterListener( this );
-        gEnv->pSystem->GetISystemEventDispatcher()->RegisterListener( this );
-        gEnv->pGameFramework->RegisterListener( this, "Video", eFLPriority_Menu );
-        gEnv->pGameFramework->GetILevelSystem()->AddListener( this );
-        gEnv->pGameFramework->GetIActionMapManager()->AddExtraActionListener( this );
-
-        // register filers
-        m_pOnlySkipFilter = gEnv->pGameFramework->GetIActionMapManager()->CreateActionFilter( "video_onlyskip", eAFT_ActionPass );
-        //m_pOnlySkipFilter->Filter("ui_skip_video");
-        //m_pOnlySkipFilter->Enable(true);
-
-        // register cvars
-        REGISTER_CVAR( vp_playbackmode, VPM_Default, VF_NULL, "don't restore material in editor mode (0=restore,1=pause,2=play)" );
-        REGISTER_CVAR( vp_seekthreshold, SEEK_THRESHOLD, VF_NULL, "threshold in seconds after which seeks will be triggered" );
-        REGISTER_CVAR( vp_dropthreshold, DROP_THRESHOLD, VF_NULL, "threshold in seconds after which drops will be triggered" );
-        REGISTER_CVAR( vp_dropmaxduration, DROP_MAXDURATION, VF_NULL, "maximal duration to drop at one time before outputting a frame again" );
 
         return true;
     }
 
-    IVideoplayer* CVideoplayerSystem::CreateVideoplayer()
+    IVideoplayer* CVideoplayerSystem::CreateVideoplayer( const char* sType )
     {
         // Return a unique video id for now only WebM class
 #if !defined(VP_DISABLE_DECODE)
