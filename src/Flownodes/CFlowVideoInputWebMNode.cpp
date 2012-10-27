@@ -113,67 +113,8 @@ namespace VideoplayerPlugin
             void Serialize( SActivationInfo* pActInfo, TSerialize ser )
             {
                 /*
-                if (ser.IsReading())
-                {
-                    int counter = m_iCursorCounter;
-
-                    while(counter > 0)
-                    {
-                        gEnv->pHardwareMouse->DecrementCounter();
-                        --counter;
-                    }
-                }
-
-                ser.Value("m_bEnabled", m_bEnabled);
-                ser.Value("m_iCursorCounter", m_iCursorCounter);
-                ser.Value("m_bKeyPressed", m_bKeyPressed);
-                ser.Value("m_bOnEnter", m_bOnEnter);
-                ser.Value("m_bOnLeave", m_bOnLeave);
-                ser.Value("m_EntityID", m_EntityID);
-                ser.Value("m_LastEntityID", m_LastEntityID);
-                ser.Value("m_sKey", m_sKey);
-                ser.Value("m_sRaySelection", m_sRaySelection);
-
-                if (ser.IsReading())
-                {
-                    m_actInfo = *pActInfo;
-
-                    if(gEnv->pHardwareMouse)
-                        gEnv->pHardwareMouse->AddListener(this);
-
-                    if(GetISystem() && GetISystem()->GetIInput())
-                        GetISystem()->GetIInput()->AddEventListener(this);
-
-                    if(GetPortBool(&m_actInfo, EIP_EnableModalMode))
-                    {
-                        m_bKeyPressed = true;
-                        m_bNoInput = true;
-
-                        if(GetPortBool(&m_actInfo, EIP_DisableMovement))
-                        {
-                            Movement(false);
-                        }
-
-                        MouseCursor(true);
-                    }
-                    else
-                    {
-                        Movement(true);
-                    }
-
-                    if (m_bEnabled && m_bKeyPressed)
-                    {
-                        int counter = m_iCursorCounter;
-
-                        while (counter > 0)
-                        {
-                            gEnv->pHardwareMouse->IncrementCounter();
-                            --counter;
-                        }
-
-                        Movement(false);
-                    }
-                } */
+                TODO: Implement serialization
+                */
             }
 
             virtual void GetConfiguration( SFlowNodeConfig& config )
