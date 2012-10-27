@@ -116,10 +116,12 @@ namespace VideoplayerPlugin
             bool        m_bStart;
             bool        m_bSceneStart;
             bool        m_bPaused;
+            bool        m_bShowMenuOnEnd;
+            bool        m_bShowMenuOnEndDefault;
 
             std::queue<SVideoEvent> m_qVideoEvents;
         public:
-            CVideoplayerPlaylist();
+            CVideoplayerPlaylist( bool bShowMenuOnEndDefault = false );
             ~CVideoplayerPlaylist();
 
             void QueueEvent( SVideoEvent::eVideoEventType type, IVideoplayer*    pVideo );

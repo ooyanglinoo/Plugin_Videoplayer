@@ -418,7 +418,7 @@ namespace VideoplayerPlugin
         updateVideoResources( VRT_DX9 );
     }
 
-    void CVideoplayerSystem::SetScreenState( const EScreenState state )
+    void CVideoplayerSystem::SetScreenState( const EScreenState state, bool bJustSet )
     {
         if ( gEnv->IsEditor() )
         {
@@ -433,7 +433,7 @@ namespace VideoplayerPlugin
             EScreenState oldstate = m_currentScreenState;
             m_currentScreenState = state;
 
-            if ( m_pAutoPlaylists )
+            if ( m_pAutoPlaylists && !bJustSet )
             {
                 // if auto playlist event present then trigger them according to the state change
                 if ( oldstate == eSS_Initialize && state == eSS_StartScreen )
@@ -492,27 +492,33 @@ namespace VideoplayerPlugin
                 {
                     sSystem = "MenuEvents";
                     sEvent = "OnStartIngameMenu";
-                    SetScreenState( eSS_PausedScreen );
                 }
 
                 else
                 {
                     sSystem = "System";
                     sEvent = "OnSystemStarted";
-                    SetScreenState( eSS_Menu );
 
                     args.AddArgument( false ); // level load false
                 }
             }
 
-            IUIEventSystem* system = gEnv->pFlashUI->GetEventSystem( sSystem, IUIEventSystem::eEST_SYSTEM_TO_UI );
-
-            // Make the call if event system present
-            if ( system )
+            if ( gEnv->pFlashUI )
             {
-                system->SendEvent( SUIEvent( system->GetEventId( sEvent ), SUIArguments( args ) ) );
+                IUIEventSystem* system = gEnv->pFlashUI->GetEventSystem( sSystem, IUIEventSystem::eEST_SYSTEM_TO_UI );
+
+                // Make the call if event system present
+                if ( system )
+                {
+                    system->SendEvent( SUIEvent( system->GetEventId( sEvent ), SUIArguments( args ) ) );
+                }
             }
         }
+    }
+
+    bool CVideoplayerSystem::IsMenuVisible()
+    {
+        return GetScreenState() == eSS_Menu || GetScreenState() == eSS_PausedScreen;
     }
 
     void CVideoplayerSystem::BlockGameForVideo( bool bBlock )
@@ -680,9 +686,9 @@ namespace VideoplayerPlugin
         }
     }
 
-    IVideoplayerPlaylist* CVideoplayerSystem::CreatePlaylist()
+    IVideoplayerPlaylist* CVideoplayerSystem::CreatePlaylist( bool bShowMenuOnEndDefault )
     {
-        CVideoplayerPlaylist* pPlaylist = new CVideoplayerPlaylist();
+        CVideoplayerPlaylist* pPlaylist = new CVideoplayerPlaylist( bShowMenuOnEndDefault );
         m_pPlaylists[pPlaylist] = ( IVideoplayerPlaylist* )pPlaylist;
 
         return pPlaylist;

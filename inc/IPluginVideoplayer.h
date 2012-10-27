@@ -550,9 +550,10 @@ namespace VideoplayerPlugin
 
         /**
         * @brief Create a media playlist
+        * @param bShowMenuOnEndDefault Show the menu when the playlist ends defaultvalue
         * @return Pointer to a media playlist interface
         */
-        virtual IVideoplayerPlaylist* CreatePlaylist() = 0;
+        virtual IVideoplayerPlaylist* CreatePlaylist( bool bShowMenuOnEndDefault = false ) = 0;
 
         /**
         * @brief Delete a media playlist

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Videoplayer>
+  <!--
+   This sample shows how to create a Main Menu with a map as background
+   * Rename this file to "Auto_Menu.xml" to activate it
+   * specify OnEndShowMenu="false" in the "Auto_Start.xml" to hide the main menu during map loading
+   * to show your custom menu with the map as background use Flownodes inside your map
+     * or specify OnEndShowMenu="true" in the "Auto_Video.xml" inside the your map directory to show the default main menu
+   * to show foreground or background videos use the "Auto_Video.xml" inside your map directory
+   -->
+
+  <Scene Skippable="0">
+    <Command DelayFrames="1">
+      map empty
+    </Command>
+  </Scene>
+
+</Videoplayer>

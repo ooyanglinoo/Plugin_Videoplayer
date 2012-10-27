@@ -8,7 +8,7 @@ namespace VideoplayerPlugin
 {
     CAutoPlaylists::CAutoPlaylists()
     {
-        m_pSplashScreen = gVideoplayerSystem->CreatePlaylist();
+        m_pSplashScreen = gVideoplayerSystem->CreatePlaylist( true ); // Only for Playlist the default is to show the menu
         m_pMenu = gVideoplayerSystem->CreatePlaylist();
         m_pMenuIngame = gVideoplayerSystem->CreatePlaylist();
         m_pLevelLoaded = gVideoplayerSystem->CreatePlaylist();
@@ -87,8 +87,6 @@ namespace VideoplayerPlugin
         }
     }
 
-
-
     void CAutoPlaylists::OnStart()
     {
         OnScreenChange();
@@ -116,7 +114,6 @@ namespace VideoplayerPlugin
     {
         if ( pPlaylist == m_pSplashScreen && gVideoplayerSystem->GetScreenState() == eSS_StartScreen )
         {
-            gVideoplayerSystem->ShowMenu( true );
             OnMenu( false );
         }
     }
