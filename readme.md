@@ -1,5 +1,3 @@
-!!This is work in progress!!
-
 Videoplayer-Plugin
 ==================
 
@@ -21,14 +19,15 @@ Features
 * C++ Interface
 
 Release Notes (V1.6.2)
-----------------------
+==============
 Stable Release tested with:
-* CryEngine 3 FreeSDK Version 3.4
+* CryEngine 3 FreeSDK Version 3.4.0
 * DirectX 11 and 9
 * 32 and 64 Bit
+* Plugin SDK Version 1.0
 
 This shouldn't be an issue anymore in the next FreeSDK version
---------------------------------------------------------------
+--------------------
 * Plugin is partly disabled in Launcher (32 bit) when using DX11 (ingame white texture, splashscreens work)
 * Known DX11 CryEngine3 FreeSDK 3.4 Bug (don't reload your map)
 
@@ -53,7 +52,8 @@ Designers
 
 Developers
 ----------
-* If you want to use video functions using C++ please clone the latest stable branch and add the "Plugin_Videoplayer/inc" path to your include directories.
+* If you want to use video functions using C++ please clone the latest stable branch and add the "..\Plugin_Videoplayer\inc" path to your include directories
+* For the Debug Configuration please download the [DirectX SDK](http://www.microsoft.com/en-us/download/details.aspx?id=6812)
 
 CVars
 =====

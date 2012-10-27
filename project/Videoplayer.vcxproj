@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\changelog.txt" />
+    <None Include="..\changelog.md" />
     <None Include="..\authors.txt" />
     <None Include="..\license.txt" />
     <None Include="..\readme.md" />
