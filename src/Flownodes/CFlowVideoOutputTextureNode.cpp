@@ -60,16 +60,16 @@ namespace VideoplayerPlugin
             {
                 static const SInputPortConfig inputs[] =
                 {
-                    InputPortConfig_Void( "Get",             _HELP( "Get texture info" ) ),
-                    InputPortConfig<int>( "VideoID", -1,     _HELP( "id" ),                            "nVideoID" ),
+                    InputPortConfig_Void( "Get", _HELP( "Get texture info" ) ),
+                    InputPortConfig<int>( "VideoID", -1, _HELP( "id" ), "nVideoID" ),
                     {0},
                 };
 
                 static const SOutputPortConfig outputs[] =
                 {
-                    OutputPortConfig_Void( "OnChanged",      _HELP( "texture name/id changed" ) ),
-                    OutputPortConfig<int>( "TextureID",      _HELP( "texture id" ),                "nTextureID" ),
-                    OutputPortConfig<string>( "TextureName", _HELP( "texture name" ),              "sTextureName" ),
+                    OutputPortConfig_Void( "OnChanged", _HELP( "texture name/id changed" ) ),
+                    OutputPortConfig<int>( "TextureID", _HELP( "texture id" ), "nTextureID" ),
+                    OutputPortConfig<string>( "TextureName", _HELP( "texture name" ), "sTextureName" ),
                     {0},
                 };
 
@@ -85,9 +85,11 @@ namespace VideoplayerPlugin
                 switch ( evt )
                 {
                     case eFE_Suspend:
+                        pActInfo->pGraph->SetRegularlyUpdated( pActInfo->myID, false );
                         break;
 
                     case eFE_Resume:
+                        pActInfo->pGraph->SetRegularlyUpdated( pActInfo->myID, true );
                         break;
 
                     case eFE_Initialize:
@@ -98,6 +100,7 @@ namespace VideoplayerPlugin
                         if ( IsPortActive( pActInfo, EIP_GET ) && !m_pVideo )
                         {
                             m_pVideo = gVideoplayerSystem->GetVideoplayerById( GetPortInt( pActInfo, EIP_VIDEOID ) );
+                            pActInfo->pGraph->SetRegularlyUpdated( pActInfo->myID, true );
                         }
 
                         else if ( m_pVideo )
@@ -109,17 +112,10 @@ namespace VideoplayerPlugin
                             }
                         }
 
-                        if ( !m_pVideo && m_nID != -1 )
-                        {
-                            m_nID = -1;
-                            m_sName = "";
+                        break;
 
-                            ActivateOutput( pActInfo, EOP_TEXID, m_nID );
-                            ActivateOutput( pActInfo, EOP_TEXNAME, m_sName );
-                            ActivateOutput( pActInfo, EOP_CHANGED, true );
-                        }
-
-                        else if ( m_pVideo )
+                    case eFE_Update:
+                        if ( m_pVideo )
                         {
                             ITexture* tex = m_pVideo->GetTexture();
 
@@ -134,9 +130,18 @@ namespace VideoplayerPlugin
                             }
                         }
 
-                        break;
+                        if ( !m_pVideo && m_nID != -1 )
+                        {
+                            m_nID = -1;
+                            m_sName = "";
 
-                    case eFE_Update:
+                            ActivateOutput( pActInfo, EOP_TEXID, m_nID );
+                            ActivateOutput( pActInfo, EOP_TEXNAME, m_sName );
+                            ActivateOutput( pActInfo, EOP_CHANGED, true );
+
+                            pActInfo->pGraph->SetRegularlyUpdated( pActInfo->myID, false );
+                        }
+
                         break;
                 }
             }
