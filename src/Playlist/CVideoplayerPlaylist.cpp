@@ -7,13 +7,14 @@
 #include <sstream>
 #include <ios>
 
+#include <PMUtils.hpp>
+
 // No NULL pointer instead empty string
 #define SSTRING(text) (text?text:"")
 
 namespace VideoplayerPlugin
 {
-
-    bool isempty( char* str )
+    bool isempty( const char* str )
     {
         while ( *str != 0 )
             if ( !isspace( *str++ ) )
@@ -86,7 +87,7 @@ namespace VideoplayerPlugin
     }
 
     template<>
-    bool SGetAttr( IXmlNode* node, const char* sAttr, bool bDefault )
+    bool SGetAttr<bool>( IXmlNode* node, const char* sAttr, bool bDefault )
     {
         bool bRet = bDefault;
 
@@ -103,9 +104,33 @@ namespace VideoplayerPlugin
         return bRet;
     }
 
+    string SGetContent( IXmlNode* node, string sDefault )
+    {
+        string sRet = sDefault;
+
+        if ( node->getContent() != NULL )
+        {
+            const char* sTest = SSTRING( node->getContent() );
+
+            XmlString xmlString;
+
+            if ( !isempty( sTest ) )
+            {
+                sRet = sTest;
+            }
+        }
+
+        return sRet;
+    }
+
 #define XML_SCENE "scene"
 #define XML_INPUT "input"
 #define XML_OUTPUT "output"
+#define XML_ONENDSHOWMENU "onendshowmenu"
+
+#define XML_COMMAND "command"
+#define XML_DELAYFRAMES "delayframes"
+#define XML_DELAYSECONDS "delayseconds"
 
 #define XML_LOOP "loop"
 #define XML_SKIPPABLE "skippable"
@@ -134,9 +159,12 @@ namespace VideoplayerPlugin
 #define XML_TIMESOURCE "timesource"
 #define XML_DROPMODE "dropmode"
 
-    CVideoplayerPlaylist::CVideoplayerPlaylist()
+    CVideoplayerPlaylist::CVideoplayerPlaylist( bool bShowMenuOnEndDefault )
     {
         m_xmlPlaylist = NULL;
+        m_bShowMenuOnEnd = bShowMenuOnEndDefault;
+        m_bShowMenuOnEndDefault = bShowMenuOnEndDefault;
+
         Close();
     }
 
@@ -226,22 +254,32 @@ namespace VideoplayerPlugin
 
         if ( !readNextScene() )
         {
-            OnEndPlaylist();
+            Close();
+        }
+    }
+
+    static void _DelayMenuShow( void* d )
+    {
+        if ( gVideoplayerSystem )
+        {
+            gVideoplayerSystem->ShowMenu( true );
         }
     }
 
     void CVideoplayerPlaylist::OnEndPlaylist()
     {
+        if ( m_bShowMenuOnEnd )
+        {
+            // Show menu in the next frame
+            gPluginManager->DelayFunction( &_DelayMenuShow, NULL, 0 );
+        }
+
         m_CurrentScene.reset();
 
         for ( std::vector<IVideoplayerPlaylistEventListener*>::const_iterator iterQueue = vecQueue.begin(); iterQueue != vecQueue.end(); ++iterQueue )
         {
             ( *iterQueue )->OnEndPlaylist( this );
         }
-
-#if defined(_DEBUG)
-        gPlugin->LogAlways( "Playlist OnEnd file(%s) scenes(%d)", m_sFile.c_str(), m_iSceneCount );
-#endif
     }
 
     SVideoInput::SVideoInput()
@@ -337,7 +375,7 @@ namespace VideoplayerPlugin
 
         reset();
 
-        if ( xmlInput != NULL && xmlInput->isTag( XML_INPUT ) )
+        if ( xmlInput && xmlInput->isTag( XML_INPUT ) )
         {
             sClass = SGetAttr<string>( xmlInput, XML_CLASS, string( "inputwebm" ) );
             sVideo = SGetAttr<string>( xmlInput, XML_VIDEO, string( "" ) );
@@ -388,7 +426,7 @@ namespace VideoplayerPlugin
         bool bRet = false;
         v2DOutputs.clear();
 
-        if ( xmlInput != NULL && xmlInput->isTag( XML_INPUT ) )
+        if ( xmlInput && xmlInput->isTag( XML_INPUT ) )
         {
             bRet = input.init( xmlInput, pPlaylist );
 
@@ -400,7 +438,7 @@ namespace VideoplayerPlugin
                 {
                     XmlNodeRef xmlOutput = xmlInput->getChild( iOutput );
 
-                    if ( xmlOutput != NULL && xmlOutput->isTag( XML_OUTPUT ) )
+                    if ( xmlOutput && xmlOutput->isTag( XML_OUTPUT ) )
                     {
                         S2DVideo* pVideo = gVideoplayerSystem->Create2DVideo();
 
@@ -421,7 +459,63 @@ namespace VideoplayerPlugin
                             v2DOutputs.push_back( pVideo );
                         }
                     }
+
+                    else
+                    {
+                        gPlugin->LogWarning( "Playlist Scene Output invalid near XML Line %d", xmlOutput ? xmlOutput->getLine() : xmlInput->getLine() );
+                    }
                 }
+            }
+        }
+
+        return bRet;
+    }
+
+    bool SceneCommand( XmlNodeRef xmlInput )
+    {
+        bool bRet = false;
+
+        if ( xmlInput && xmlInput->isTag( XML_COMMAND ) )
+        {
+            string sCommand = SGetContent( xmlInput, "" ).Trim();
+
+            if ( sCommand.length() > 0 )
+            {
+                PluginManager::CallDelay::eDelayType eType = PluginManager::CallDelay::eDT_None;
+
+                float fDelay = SGetAttr( xmlInput, XML_DELAYFRAMES, -1.0f );
+
+                if ( fDelay > 0 )
+                {
+                    eType = PluginManager::CallDelay::eDT_Frames;
+                }
+
+                else
+                {
+                    fDelay = SGetAttr( xmlInput, XML_DELAYSECONDS, -1.0f );
+
+                    if ( fDelay > 0 )
+                    {
+                        eType = PluginManager::CallDelay::eDT_Seconds;
+                    }
+                }
+
+                if ( eType == PluginManager::CallDelay::eDT_None )
+                {
+                    gEnv->pConsole->ExecuteString( sCommand );
+                }
+
+                else
+                {
+                    gPluginManager->DelayCommand( sCommand, fDelay, eType );
+                }
+
+                bRet = true;
+            }
+
+            else
+            {
+                gPlugin->LogWarning( "Playlist Scene Command empty near XML Line %d", xmlInput->getLine() );
             }
         }
 
@@ -443,10 +537,15 @@ namespace VideoplayerPlugin
             for ( int iInput = 0; iInput < iInputCount; ++iInput )
             {
                 vInputs.push_back( SSceneInput() );
-                bRet = vInputs.back().init( xmlScene->getChild( iInput ), pPlaylist );
+
+                XmlNodeRef xmlChild = xmlScene->getChild( iInput );
+
+                bRet = vInputs.back().init( xmlChild, pPlaylist );
+                bRet |= bRet || SceneCommand( xmlChild );
 
                 if ( !bRet )
                 {
+                    gPlugin->LogError( "Playlist Scene XML not valid near XML Line %d", xmlChild ? xmlChild->getLine() : xmlScene->getLine() );
                     break;
                 }
             }
@@ -575,12 +674,15 @@ namespace VideoplayerPlugin
         m_bBlockGame = bBlockGame;
         m_sFile = sPlaylist;
         m_xmlPlaylist = gEnv->pSystem->LoadXmlFromFile( sPlaylist );
+        m_bShowMenuOnEnd = m_bShowMenuOnEndDefault;
 
         m_iScene = 0;
 
         if ( m_xmlPlaylist != NULL )
         {
             m_iSceneCount = m_xmlPlaylist->getChildCount();
+
+            m_bShowMenuOnEnd = SGetAttr( m_xmlPlaylist, XML_ONENDSHOWMENU, m_bShowMenuOnEndDefault );
 
             if ( nStartAtScene > 0 )
             {
@@ -608,6 +710,13 @@ namespace VideoplayerPlugin
 
     void CVideoplayerPlaylist::Close()
     {
+        if ( m_xmlPlaylist )
+        {
+#if defined(_DEBUG)
+            gPlugin->LogAlways( "Playlist OnEnd file(%s) scenes(%d)", m_sFile.c_str(), m_iSceneCount );
+#endif
+        }
+
         m_iScene = 0;
         m_iSceneCount = 0;
         m_bLoop = false;

@@ -118,6 +118,7 @@ namespace VideoplayerPlugin
             tOverrideMap m_Overrides; //!< material 1:N override relation
             t2DVideos m_p2DVideos; //!< 2D video information of active 2D video window
 
+
             int m_nGameLoopActive; //!< If <0 then game loop inactive
             int m_nD3DActive; //!< If <0 then the D3D system is inactive
             float m_fFrameTime; //!< current frame time
@@ -137,8 +138,8 @@ namespace VideoplayerPlugin
             * @brief draw all 2D resources
             */
             virtual void DrawAll();
-
         public:
+
             // see ID3DListener
             virtual void OnPrePresent();
             virtual void OnPostPresent() {};
@@ -170,14 +171,15 @@ namespace VideoplayerPlugin
 
             /**
             * @brief Set the screen state
-            * @param state New screen state
-            * @attention in editor the screenstate is always set to editor
+            * @param eState New screen state
+            * @param bJustSet Don't trigger menu changes (used internally)
+            * @attention in editor the screen state is always set to editor
             */
-            virtual void SetScreenState( const EScreenState state );
+            virtual void SetScreenState( const EScreenState eState, bool bJustSet = false );
 
             /**
             * @brief Retrieve the screen state
-            * @attention in editor the screenstate is always set to editor
+            * @attention in editor the screen state is always set to editor
             */
             virtual EScreenState GetScreenState() const;
 
@@ -187,6 +189,12 @@ namespace VideoplayerPlugin
             * @attention The UI Events OnStopIngameMenu, OnStartIngameMenu and OnSystemStarted must be implemented like in the default SDK.
             */
             virtual void ShowMenu( bool bShow );
+
+            /**
+            * @brief Is the Menu visible
+            * @return menu visible
+            */
+            virtual bool IsMenuVisible();
 
             /**
             * @brief Freeze the game but show the pause menu
@@ -220,7 +228,7 @@ namespace VideoplayerPlugin
             void DeleteVideoplayer( IVideoplayer* pVideoplayer );
             IVideoplayer* GetVideoplayerById( int nVideoID = -1 );
 
-            IVideoplayerPlaylist* CreatePlaylist();
+            IVideoplayerPlaylist* CreatePlaylist( bool bShowMenuOnEndDefault = false );
             void DeletePlaylist( IVideoplayerPlaylist* pPlaylist );
 
             S2DVideo* Create2DVideo();
