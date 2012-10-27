@@ -475,6 +475,7 @@ namespace VideoplayerPlugin
             // Scaleform UI active
             string sSystem = "";
             string sEvent = "";
+            SUIArguments args;
 
             // Set the currently required flash call (for the cryengine standard menu)
             // if the menu doesn't implement those method then change those function names
@@ -499,6 +500,8 @@ namespace VideoplayerPlugin
                     sSystem = "System";
                     sEvent = "OnSystemStarted";
                     SetScreenState( eSS_Menu );
+
+                    args.AddArgument( false ); // level load false
                 }
             }
 
@@ -507,7 +510,7 @@ namespace VideoplayerPlugin
             // Make the call if event system present
             if ( system )
             {
-                system->SendEvent( SUIEvent( system->GetEventId( sEvent ) ) );
+                system->SendEvent( SUIEvent( system->GetEventId( sEvent ), SUIArguments( args ) ) );
             }
         }
     }
