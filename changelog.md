@@ -15,6 +15,9 @@ Changes:
 * Improved SSE2 YUV Conversion
 * Less Console Logging
 
+Fixes:
+* DirectX 9 mode can resize/fullscreen the renderer again without restarting
+
 Videoplayer Plugin 1.6.1 (07.09.2012)
 ==============
 Stable Release for 32/64 bit FreeSDK 3.4 (DX9 & DX11)

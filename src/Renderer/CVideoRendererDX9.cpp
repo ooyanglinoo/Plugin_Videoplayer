@@ -8,7 +8,7 @@
 #include <IPluginD3D.h>
 
 #ifdef _DEBUG
-//    #include <DxErr.h>
+#include <DxErr.h>
 #pragma comment( lib, "dxerr" )
 #endif
 
@@ -52,19 +52,40 @@ namespace VideoplayerPlugin
     {
     }
 
+    template<typename tResource>
+    UINT safeRelease( tResource& pResource, bool bWarn = false )
+    {
+        UINT nRet = 0;
+
+        if ( pResource )
+        {
+            nRet = pResource->Release();
+
+            if ( nRet > 1 )
+            {
+                // normally 0 but it seems one is kept internally even after removetexture (probably released in a delayed way)
+                gPlugin->LogWarning( "safeRelease references left %d on resource %p", nRet, pResource );
+            }
+
+            pResource = NULL;
+        }
+
+        return nRet;
+    }
+
     void CVideoRendererDX9::ReleaseResources()
     {
         CVideoRenderer::ReleaseResources();
-
-        SAFE_RELEASE( m_pTex );
-        SAFE_RELEASE( m_pSurfaceYUV );
-        SAFE_RELEASE( m_pStagingSurface );
 
         if ( m_iTex )
         {
             gEnv->pRenderer->RemoveTexture( m_iTex );
             m_iTex = 0;
         }
+
+        safeRelease( m_pTex, true );
+        safeRelease( m_pSurfaceYUV, true  );
+        safeRelease( m_pStagingSurface, true  );
     }
 
     bool CVideoRendererDX9::CreateResources( unsigned nSourceWidth, unsigned nSourceHeight, unsigned nTargetWidth, unsigned nTargetHeight )
@@ -272,10 +293,7 @@ namespace VideoplayerPlugin
                     outputError( hr );
                 }
 
-                if ( surfaceTemp )
-                {
-                    surfaceTemp->Release();
-                }
+                SAFE_RELEASE( surfaceTemp );
             }
 
 #endif
@@ -327,6 +345,8 @@ namespace VideoplayerPlugin
                         m_bDirty = false;
                     }
                 }
+
+                SAFE_RELEASE( surfaceTemp );
             }
         }
 
