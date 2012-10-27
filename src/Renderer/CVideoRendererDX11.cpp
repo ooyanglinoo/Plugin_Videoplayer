@@ -10,7 +10,9 @@ namespace VideoplayerPlugin
 
     CVideoRendererDX11::CVideoRendererDX11()
     {
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Created DX11 VideoRenderer" );
+#endif
     }
 
     CVideoRendererDX11::~CVideoRendererDX11()

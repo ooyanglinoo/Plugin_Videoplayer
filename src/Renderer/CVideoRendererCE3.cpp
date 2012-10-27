@@ -27,7 +27,9 @@ namespace VideoplayerPlugin
         m_pData = NULL;
         m_iTex = 0;
 
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Created CE3 VideoRenderer" );
+#endif
     }
 
     CVideoRendererCE3::~CVideoRendererCE3()
@@ -116,7 +118,7 @@ namespace VideoplayerPlugin
 
             else
             {
-                gPlugin->LogAlways( "Could not map texture." );
+                gPlugin->LogError( "Could not map texture." );
             }
 
             bRet = gEnv->pRenderer->SF_UnmapTexture( m_iTex, 0 );
@@ -146,7 +148,7 @@ namespace VideoplayerPlugin
 
             else
             {
-                gPlugin->LogAlways( "Could not map texture." );
+                gPlugin->LogError( "Could not map texture." );
             }
 
             bRet = gEnv->pRenderer->SF_UnmapTexture( m_iTex, 0 );

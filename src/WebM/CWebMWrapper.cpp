@@ -94,7 +94,7 @@ namespace VideoplayerPlugin
 
         else
         {
-            gPlugin->LogAlways( "Could not create texture." );
+            gPlugin->LogError( "Could not create texture." );
         }
 
         return false;
@@ -191,16 +191,18 @@ namespace VideoplayerPlugin
 
         // resume playback at last position
         m_Sound.Resume();
-
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Resume id(%d) video(%.2fs) sound(%.2fs) duration(%.2fs)", m_nVideoId, GetPosition(), m_Sound.GetPosition(), GetDuration() );
+#endif
     }
 
     void CWebMWrapper::Pause()
     {
         m_bPaused = true;
         m_Sound.Pause();
-
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Pause id(%d) video(%.2fs) sound(%.2fs) duration(%.2fs)", m_nVideoId, GetPosition(), m_Sound.GetPosition(), GetDuration() );
+#endif
     }
 
     int CWebMWrapper::GetId()
@@ -536,7 +538,9 @@ namespace VideoplayerPlugin
             ( *iterQueue )->OnStart();
         }
 
+#if defined(_DEBUG)
         gPlugin->LogAlways( "OnStart id(%d) video(%.2fs) sound(%.2fs) duration(%.2fs)", m_nVideoId, GetPosition(), m_Sound.GetPosition(), GetDuration() );
+#endif
     }
 
     void CWebMWrapper::OnEnd()
@@ -558,7 +562,9 @@ namespace VideoplayerPlugin
             ( *iterQueue )->OnEnd();
         }
 
+#if defined(_DEBUG)
         gPlugin->LogAlways( "OnEnd id(%d) video(%.2fs) sound(%.2fs) duration(%.2fs)", m_nVideoId, GetPosition(), m_Sound.GetPosition(), GetDuration() );
+#endif
     }
 
     void CWebMWrapper::OnSeek()
@@ -586,7 +592,9 @@ namespace VideoplayerPlugin
             vpx_usec_timer_start( &m_timer );
         }
 
+#if defined(_DEBUG)
         gPlugin->LogAlways( "OnSeek id(%d) video(%.2fs) sound(%.2fs) duration(%.2fs)", m_nVideoId, GetPosition(), m_Sound.GetPosition(), GetDuration() );
+#endif
     }
 
     float CWebMWrapper::GetFrameDuration()
@@ -704,7 +712,7 @@ namespace VideoplayerPlugin
             {
                 // Trigger seek
 #ifdef _DEBUG
-                gPlugin->LogAlways( "Advance Seek id(%d) frames(%u) diff(%.2f) current(%.2fs) target(%.2fs)",  m_nVideoId, uFrames, fDifference, m_fTimerNextFrame, m_fTimer );
+                gPlugin->LogWarning( "Advance Seek id(%d) frames(%u) diff(%.2f) current(%.2fs) target(%.2fs)",  m_nVideoId, uFrames, fDifference, m_fTimerNextFrame, m_fTimer );
 #endif
 
                 Seek( m_fTimer );
@@ -717,7 +725,7 @@ namespace VideoplayerPlugin
             {
                 // Trigger frame drop
 #ifdef _DEBUG
-                gPlugin->LogAlways( "Advance Drop id(%d) frames(%u) diff(%.2f) current(%.2fs) target(%.2fs)",  m_nVideoId, uFrames, fDifference, m_fTimerNextFrame, m_fTimer );
+                gPlugin->LogWarning( "Advance Drop id(%d) frames(%u) diff(%.2f) current(%.2fs) target(%.2fs)",  m_nVideoId, uFrames, fDifference, m_fTimerNextFrame, m_fTimer );
 #endif
 
                 // read until one frame to be rendered is left (drop data) or the max drop duration is reached

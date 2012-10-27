@@ -560,7 +560,7 @@ namespace VideoplayerPlugin
 
         else
         {
-            gPlugin->LogWarning( "D3D Plugin not found, using fallbacks, some features might not work or be slower" );
+            gPlugin->LogWarning( "D3D Plugin not found, using fallbacks, some features might not work or be slower, in DX11 crashs can happen" );
         }
 
         if ( gEnv )

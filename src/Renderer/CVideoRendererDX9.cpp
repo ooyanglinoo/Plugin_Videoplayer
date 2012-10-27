@@ -8,7 +8,7 @@
 #include <IPluginD3D.h>
 
 #ifdef _DEBUG
-#include <DxErr.h>
+//    #include <DxErr.h>
 #pragma comment( lib, "dxerr" )
 #endif
 
@@ -27,9 +27,9 @@ namespace VideoplayerPlugin
     void outputError( HRESULT hr )
     {
 #ifdef _DEBUG
-        gPlugin->LogAlways( "Error hr=%u %s error description: %s\n", ( unsigned )hr, DXGetErrorString( hr ), DXGetErrorDescription( hr ) );
+        gPlugin->LogError( "Error hr=%u %s error description: %s\n", ( unsigned )hr, DXGetErrorString( hr ), DXGetErrorDescription( hr ) );
 #else
-        gPlugin->LogAlways( "Error hr=%u", ( unsigned )hr );
+        gPlugin->LogError( "Error hr=%u", ( unsigned )hr );
 #endif
     }
 
@@ -43,8 +43,9 @@ namespace VideoplayerPlugin
 
         m_pD3DDevice = static_cast<IDirect3DDevice9*>( gD3DSystem->GetDevice() );
         m_iTex = 0;
-
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Created DX9 VideoRenderer" );
+#endif
     }
 
     CVideoRendererDX9::~CVideoRendererDX9()
@@ -103,8 +104,9 @@ namespace VideoplayerPlugin
                 if (    FAILED( pD3D->CheckDeviceFormatConversion( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_UNKNOWN, D3DFMT_X8R8G8B8 ) )
                         &&  SUCCEEDED( pD3D->CheckDeviceFormatConversion( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, D3DFMT_YV12, D3DFMT_X8R8G8B8 ) ) )
                 {
+#if defined(_DEBUG)
                     gPlugin->LogAlways( "Creating YUV surface." );
-
+#endif
                     hr = m_pD3DDevice->CreateOffscreenPlainSurface( nSourceWidth, nSourceHeight, D3DFMT_YV12, D3DPOOL_DEFAULT, &m_pSurfaceYUV, NULL );
 
                     if ( FAILED( hr ) || !m_pSurfaceYUV )
@@ -120,7 +122,7 @@ namespace VideoplayerPlugin
                 if ( !m_pSurfaceYUV )
                 {
 #if !defined(USE_SEPERATEMEMORY)
-                    gPlugin->LogAlways( "Couldn't create YUV surface, switching to fallback." );
+                    gPlugin->LogWarning( "Couldn't create YUV surface, switching to fallback." );
 #endif
 
 #if !defined(USE_UPDATE_SURFACE)
@@ -148,7 +150,7 @@ namespace VideoplayerPlugin
 
                     else
                     {
-                        gPlugin->LogAlways( "Couldn't inject texture" );
+                        gPlugin->LogError( "Couldn't inject texture" );
                     }
                 }
             }

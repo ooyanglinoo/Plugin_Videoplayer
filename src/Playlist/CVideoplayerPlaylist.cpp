@@ -167,7 +167,9 @@ namespace VideoplayerPlugin
             ( *iterQueue )->OnBeginScene( this, nIndex );
         }
 
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Playlist OnBeginScene file(%s) scenes(%d) scene(%d)", m_sFile.c_str(), m_iSceneCount, nIndex );
+#endif
     }
 
     void CVideoplayerPlaylist::OnVideoStart( IVideoplayer* pVideo )
@@ -189,7 +191,9 @@ namespace VideoplayerPlugin
             ( *iterQueue )->OnVideoStart( this, pVideo );
         }
 
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Playlist OnVideoStart file(%s) scenes(%d) scene(%d) id(%d)", m_sFile.c_str(), m_iSceneCount, m_iScene, pVideo->GetId() );
+#endif
     }
 
     void CVideoplayerPlaylist::OnVideoEnd( IVideoplayer* pVideo )
@@ -199,7 +203,9 @@ namespace VideoplayerPlugin
             ( *iterQueue )->OnVideoEnd( this, pVideo );
         }
 
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Playlist OnVideoEnd file(%s) scenes(%d) scene(%d) id(%d)", m_sFile.c_str(), m_iSceneCount, m_iScene, pVideo->GetId() );
+#endif
     }
 
     void CVideoplayerPlaylist::OnEndScene( int nIndex )
@@ -209,7 +215,9 @@ namespace VideoplayerPlugin
             ( *iterQueue )->OnEndScene( this, nIndex );
         }
 
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Playlist OnEndScene file(%s) scenes(%d) scene(%d)", m_sFile.c_str(), m_iSceneCount, nIndex );
+#endif
 
         if ( m_CurrentScene.bLoop )
         {
@@ -231,7 +239,9 @@ namespace VideoplayerPlugin
             ( *iterQueue )->OnEndPlaylist( this );
         }
 
+#if defined(_DEBUG)
         gPlugin->LogAlways( "Playlist OnEnd file(%s) scenes(%d)", m_sFile.c_str(), m_iSceneCount );
+#endif
     }
 
     SVideoInput::SVideoInput()
