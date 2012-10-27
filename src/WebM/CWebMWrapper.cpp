@@ -363,6 +363,8 @@ namespace VideoplayerPlugin
             float fLeft = fArea.x + fWidthOffset;
             float fTop = fArea.y + fHeightOffset;
 
+#if !defined(DISABLE_2DDRAWING)
+
             // height and width are in virtual resolution so they are now converted and ready to use
             if ( info.cRGBA.a >= 0.01 )
             {
@@ -436,6 +438,8 @@ namespace VideoplayerPlugin
                         0 );
                 }
             }
+
+#endif
         }
     }
 
