@@ -167,27 +167,9 @@ namespace VideoplayerPlugin
                 m_nReferences += 1;
             };
 
-            virtual void Release()
-            {
-                if ( --m_nReferences < 0 )
-                {
-                    m_nReferences = 0;
-                }
+            virtual void Release();
 
-                if ( !m_nReferences )
-                {
-                    markVideoResourceForCleanup( this );
-                }
-            };
-
-            virtual void Cleanup()
-            {
-                if ( !m_nReferences )
-                {
-                    ReleaseResources();
-                    delete this;
-                }
-            };
+            virtual void Cleanup();
 
             virtual ~CVideoRenderer()
             {

@@ -299,6 +299,33 @@ namespace VideoplayerPlugin
 
 namespace VideoplayerPlugin
 {
+    void CVideoRenderer::Release()
+    {
+        if ( --m_nReferences < 0 )
+        {
+            m_nReferences = 0;
+        }
+
+        if ( !m_nReferences )
+        {
+            markVideoResourceForCleanup( this );
+        }
+    };
+
+    void CVideoRenderer::Cleanup()
+    {
+        if ( !m_nReferences )
+        {
+            ReleaseResources();
+            delete this;
+        }
+
+        else
+        {
+            gPlugin->LogWarning( "Cleanup called but references still exist." );
+        }
+    };
+
     std::queue<IVideoResource*> qVideoResourcesCleanup;
 
     typedef std::map<IVideoRenderer*, IVideoRenderer*> tVideoRendererMap;
