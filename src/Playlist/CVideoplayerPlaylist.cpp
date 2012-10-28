@@ -131,6 +131,7 @@ namespace VideoplayerPlugin
 #define XML_COMMAND "command"
 #define XML_DELAYFRAMES "delayframes"
 #define XML_DELAYSECONDS "delayseconds"
+#define XML_DELAYFILTER "delayfilter"
 
 #define XML_LOOP "loop"
 #define XML_SKIPPABLE "skippable"
@@ -271,7 +272,7 @@ namespace VideoplayerPlugin
         if ( m_bShowMenuOnEnd )
         {
             // Show menu in the next frame
-            gPluginManager->DelayFunction( &_DelayMenuShow, NULL, 0 );
+            gPluginManager->DelayFunction( "delaymenu", &_DelayMenuShow, NULL, NULL, 0, PluginManager::CallDelay::eDT_Frames );
         }
 
         m_CurrentScene.reset();
@@ -401,6 +402,7 @@ namespace VideoplayerPlugin
 
             if ( pVideo && pVideo->Open( sVideo, sSound, bLoop, bSkippable, bBlockGame, eTS, eDM, fStartAt, fEndAfter, nCustomWidth, nCustomHeight ) )
             {
+                pVideo->SetSpeed( fSpeed );
                 pVideo->RegisterListener( this );
                 bRet = true;
             }
@@ -507,7 +509,7 @@ namespace VideoplayerPlugin
 
                 else
                 {
-                    gPluginManager->DelayCommand( sCommand, fDelay, eType );
+                    gPluginManager->DelayCommand( sCommand, SGetAttr( xmlInput, XML_DELAYFILTER, string( "" ) ) , fDelay, eType );
                 }
 
                 bRet = true;
