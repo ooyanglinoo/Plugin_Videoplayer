@@ -23,6 +23,9 @@
     <None Include="..\authors.txt" />
     <None Include="..\license.txt" />
     <None Include="..\readme.md" />
+    <None Include="..\tools\build.bat" />
+    <None Include="..\tools\codestyle.astylerc" />
+    <None Include="..\tools\stylecode.bat" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\CPluginVideoplayer.cpp" />

@@ -37,12 +37,24 @@
     <Filter Include="Playlist">
       <UniqueIdentifier>{f4f813cf-f561-4435-b97b-571f319a91dc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{d02453c6-2d78-490c-8105-893390e01f84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\readme.md" />
     <None Include="..\license.txt" />
     <None Include="..\authors.txt" />
     <None Include="..\changelog.md" />
+    <None Include="..\tools\build.bat">
+      <Filter>Tools</Filter>
+    </None>
+    <None Include="..\tools\codestyle.astylerc">
+      <Filter>Tools</Filter>
+    </None>
+    <None Include="..\tools\stylecode.bat">
+      <Filter>Tools</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\StdAfx.cpp">
