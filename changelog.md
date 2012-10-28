@@ -3,20 +3,24 @@ Videoplayer Plugin 1.6.2 (30.10.2012)
 Stable Release for 32/64 bit, FreeSDK 3.4.0 (DX9 & DX11), Plugin SDK 1.0
 
 Known Limitations:
-* Plugin is partly disabled in 32bit Launcher when using DX11
+* Plugin is partly disabled in 32bit launcher when using DX11
 * Known DX11 CryEngine3 FreeSDK 3.4 Bug (don't reload your map)
 
 New:
 * Now using the Plugin SDK
-* Full sourcecode avaible under BSD-2 clause license
 * Support for playlist commands like loading a map as menu background
+  (they can also be delayed/canceled to create cvar animations, like time of the day or subtitles)
+* Support for showing default menu on playlist end
+* Full sourcecode avaible under BSD-2 clause license
 
 Changes:
-* Improved SSE2 YUV Conversion
-* Less Console Logging
+* Improved SSE2 YUV conversion
+* Less Console logging
+* New samples
 
 Fixes:
 * DirectX 9 mode can resize/fullscreen the renderer again without restarting
+* Speed attribute now works also in playlist
 
 Videoplayer Plugin 1.6.1 (07.09.2012)
 ==============

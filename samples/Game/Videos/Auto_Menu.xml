@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Videoplayer>
   <Scene Skippable="0">
-    <Input Class="InputWebM" Video="Videos\menu_background.webm" Loop="1" Skippable="0">
+    <Input Class="InputWebM" Video="Videos\menu_background.webm" Loop="1" Skippable="0" Speed="0.6">
       <Output Class="Output2D" ResizeMode="3"/>
     </Input>
   </Scene>
