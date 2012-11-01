@@ -1,37 +1,13 @@
 /* Videoplayer_Plugin - for licensing and copyright see license.txt */
 
-/*
-* Copyright (c) 2011, Nils L. Corneliusen
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions
-* are met:
-* 1. Redistributions of source code must retain the above copyright
-*    notice, this list of conditions and the following disclaimer.
-* 2. Redistributions in binary form must reproduce the above copyright
-*    notice, this list of conditions and the following disclaimer in the
-*    documentation and/or other materials provided with the distribution.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN
-* NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-* OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
-* OR OTHER DEALINGS IN THE SOFTWARE.
-*
-* This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-* http://creativecommons.org/licenses/by/3.0/
-*
-* You are free:
-*   to Share — to copy, distribute and transmit the work
-*   to Remix — to adapt the work
-*   to make commercial use of the work
-*
-* Under the following conditions:
-*   Attribution — You must attribute the work in the manner specified by the author or licensor
-*   (but not in any way that suggests that they endorse you or your use of the work)
-*/
+// This code used with permission from: http://www.ignorantus.com/yuv2rgb_sse2/
+// The following things changed:
+// - Don't repeat yourself
+// - Calculation of loop offsets
+// - Byte reorder support
+// - Alpha channel support
+// - Inline function templates with partial specializations to
+//   avoid functions calls and runtime conditionals and making a macro out of the whole thing.
 
 #ifdef _DEBUG
 #define _ITERATOR_DEBUG_LEVEL 0
@@ -76,53 +52,124 @@ namespace VideoplayerPlugin
     inline void calcAlpha( PARAMS )
     {}
 
+    enum eInterleaveMode
+    {
+        VIM_HIGH, //!< High
+        VIM_LOW, //!< Low
+    };
+
+#undef PARAMS
+#define PARAMS \
+    rtd v0, \
+    rtd v1, \
+    rtd v2, \
+    rtd v3, \
+    rtd temp0, \
+    rtd temp1, \
+    rtd rgba0, rtd rgba1 \
+     
+    template<eInterleaveMode INTERLEAVE_MODE>
+    inline void interleaveResult( PARAMS )
+    {}
+
+    template<>
+    inline void interleaveResult<VIM_LOW>( PARAMS )
+    {
+        // Interleaves the lower 8 signed or unsigned 8-bit integers in a with the lower 8 signed or unsigned 8-bit integers in b.
+        temp0 = _mm_unpacklo_epi8( v0, v3 ); // 3030..
+        temp1 = _mm_unpacklo_epi8( v2, v1 ); // 1212
+
+        // Interleaves the lower 4 signed or unsigned 16-bit integers in a with the lower 4 signed or unsigned 16-bit integers in b.
+        rgba0 = _mm_unpacklo_epi16( temp0, temp1 );  // argbargb..
+        // Interleaves the upper 4 signed or unsigned 16-bit integers in a with the upper 4 signed or unsigned 16-bit integers in b.
+        rgba1 = _mm_unpackhi_epi16( temp0, temp1 );  // argbargb..
+    }
+
+    template<>
+    inline void interleaveResult<VIM_HIGH>( PARAMS )
+    {
+        // Interleaves the upper 8 signed or unsigned 8-bit integers in a with the upper 8 signed or unsigned 8-bit integers in b.
+        temp0 = _mm_unpackhi_epi8( v0, v3 ); // 3030
+        temp1 = _mm_unpackhi_epi8( v2, v1 ); // 1212
+
+        // Interleaves the lower 4 signed or unsigned 16-bit integers in a with the lower 4 signed or unsigned 16-bit integers in b.
+        rgba0 = _mm_unpacklo_epi16( temp0, temp1 ); // argbargb..
+        // Interleaves the upper 4 signed or unsigned 16-bit integers in a with the upper 4 signed or unsigned 16-bit integers in b.
+        rgba1 = _mm_unpackhi_epi16( temp0, temp1 ); // argbargb..
+    }
+
 #undef PARAMS
 #define PARAMS \
     rtd r, \
     rtd g, \
     rtd b, \
     rtd a, \
-    rtd rgba1, rtd rgba2, \
-    rtd ggbb, rtd gbgb
+    rtd r1, \
+    rtd g1, \
+    rtd b1, \
+    rtd a1 \
+     
+    template<eAlphaMode ALPHAMODE>
+    inline void packRGBA( PARAMS )
+    {
+        // Packs the 16 signed 16-bit integers from a and b into 8-bit unsigned integers and saturates.
+        r = _mm_packus_epi16( r, r1 );         // rrrr.. saturated
+        g = _mm_packus_epi16( g, g1 );         // gggg.. saturated
+        b = _mm_packus_epi16( b, b1 );         // bbbb.. saturated
+        g1 = _mm_packus_epi16( a, a1 );         // aaaa.. saturated
+    }
+
+    template<>
+    inline void packRGBA<VAM_FILL>( PARAMS )
+    {
+        // Packs the 16 signed 16-bit integers from a and b into 8-bit unsigned integers and saturates.
+        r = _mm_packus_epi16( r, r1 );         // rrrr.. saturated
+        g = _mm_packus_epi16( g, g1 );         // gggg.. saturated
+        b = _mm_packus_epi16( b, b1 );         // bbbb.. saturated
+        // alpha not needed for fill
+    }
+
+#undef PARAMS
+#define PARAMS \
+    rtd r, \
+    rtd g, \
+    rtd b, \
+    rtd a, \
+    rtd r1, \
+    rtd g1, \
+    rtd b1, \
+    rtd a1, \
+    rtd rgba0, rtd rgba1, \
+    rtd rgba2, rtd rgba3 \
+     
+    template<eByteOrder COLOR_DST_FMT>
+    inline void correctByteOrder( PARAMS )
+    {};
+
+    template<>
+    inline void correctByteOrder<VBO_RGBA>( PARAMS )
+    {
+        interleaveResult<VIM_LOW>( r, g1, b, g, r1, b1, rgba0, rgba1 );
+        interleaveResult<VIM_HIGH>( r, g1, b, g, r1, b1, rgba2, rgba3 );
+    };
+
+    template<>
+    inline void correctByteOrder<VBO_BGRA>( PARAMS )
+    {
+        interleaveResult<VIM_LOW>( b, g1, r, g, r1, b1, rgba0, rgba1 );
+        interleaveResult<VIM_HIGH>( b, g1, r, g, r1, b1, rgba2, rgba3 );
+    };
 
     // Saturating and pack the results into chunky pixels efficiently.
-    template<eByteOrder COLOR_DST_FMT>
+    template<eByteOrder COLOR_DST_FMT, eAlphaMode ALPHAMODE>
     inline void packResult( PARAMS )
-    {}
-
-    template<>
-    inline void packResult<VBO_BGRA>( PARAMS )
     {
-        // Packs the 16 signed 16-bit integers from a and b into 8-bit unsigned integers and saturates.
-        // Interleaves the lower 8 signed or unsigned 8-bit integers in a with the lower 8 signed or unsigned 8-bit integers in b.
-        r = _mm_unpacklo_epi8( _mm_packus_epi16( r, a ), a ); // arar.. saturated
-        // Packs the 16 signed 16-bit integers from a and b into 8-bit unsigned integers and saturates.
-        ggbb = _mm_packus_epi16( g, b );  // ggggggggbbbbbbbb saturated
-        // Shifts the 128-bit value in a right by imm bytes while shifting in zeros. imm must be an immediate.
-        // Interleaves the lower 8 signed or unsigned 8-bit integers in a with the lower 8 signed or unsigned 8-bit integers in b.
-        gbgb = _mm_unpacklo_epi8( _mm_srli_si128( ggbb, 8 ), ggbb ); // gbgbgbgbgbgbgbgb
-        // Interleaves the lower 4 signed or unsigned 16-bit integers in a with the lower 4 signed or unsigned 16-bit integers in b.
-        rgba1 = _mm_unpacklo_epi16( gbgb, r ); // argbargbargbargb (low)
-        // Interleaves the upper 4 signed or unsigned 16-bit integers in a with the upper 4 signed or unsigned 16-bit integers in b.
-        rgba2 = _mm_unpackhi_epi16( gbgb, r );  // argbargbargbargb (high)
-    }
+        // g1 is used for alpha, because not needed anymore (and for constant alpha it would overwrite the constant if we would use a1)
+        packRGBA<ALPHAMODE>( r, g, b, a, r1, g1, b1, a1 );
 
-    template<>
-    inline void packResult<VBO_RGBA>( PARAMS )
-    {
-        // Packs the 16 signed 16-bit integers from a and b into 8-bit unsigned integers and saturates.
-        // Interleaves the lower 8 signed or unsigned 8-bit integers in a with the lower 8 signed or unsigned 8-bit integers in b.
-        b = _mm_unpacklo_epi8( _mm_packus_epi16( b, a ), a ); // abab.. saturated
-        // Packs the 16 signed 16-bit integers from a and b into 8-bit unsigned integers and saturates.
-        ggbb = _mm_packus_epi16( g, r );  // ggggggggrrrrrrrr saturated
-        // Shifts the 128-bit value in a right by imm bytes while shifting in zeros. imm must be an immediate.
-        // Interleaves the lower 8 signed or unsigned 8-bit integers in a with the lower 8 signed or unsigned 8-bit integers in b.
-        gbgb = _mm_unpacklo_epi8( _mm_srli_si128( ggbb, 8 ), ggbb ); // grgr ....
-        // Interleaves the lower 4 signed or unsigned 16-bit integers in a with the lower 4 signed or unsigned 16-bit integers in b.
-        rgba1 = _mm_unpacklo_epi16( gbgb, b ); // abgr ... (low)
-        // Interleaves the upper 4 signed or unsigned 16-bit integers in a with the upper 4 signed or unsigned 16-bit integers in b.
-        rgba2 = _mm_unpackhi_epi16( gbgb, b );  // abgr ... (high)
-    }
+        // r1 and b1 is overwritten, because both are not needed anymore for this row and can thus be reused
+        correctByteOrder<COLOR_DST_FMT>( r, g, b, a, r1, g1, b1, a1, rgba0, rgba1, rgba2, rgba3 );
+    };
 
 #undef PARAMS
 #define PARAMS \
@@ -137,7 +184,6 @@ namespace VideoplayerPlugin
     rtd a00, rtd a01, \
     rtd rgb0123, rtd rgb4567, \
     rtd rgb89ab, rtd rgbcdef, \
-    rtd ggbb, rtd gbgb, \
     SAlphaGenParam& ap, \
     rtdp dstrgb128
 
@@ -150,42 +196,21 @@ namespace VideoplayerPlugin
         // the multiplier we used on the factors.
         calcRows(
             y00r0, y01r0, //all
-            rv00,   rv01, // r
+            rv00, rv01, // r
             gu00, gv00, gu01, gv01, // g
             bu00, bu01, // b
             r00, r01, g00, g01, b00, b01 // result
         );
 
         // calculate alpha
-        calcAlpha<ALPHAMODE>(
-            r00, g00, b00,
-            a00,
-            ap
-        );
-
-        calcAlpha<ALPHAMODE>(
-            r01, g01, b01,
-            a01,
-            ap
-        );
+        calcAlpha<ALPHAMODE>( r00, g00, b00, a00, ap );
+        calcAlpha<ALPHAMODE>( r01, g01, b01, a01, ap );
 
         // The remaining challenge is saturating and packing the results into chunky pixels efficiently.
-        packResult<COLOR_DST_FMT>(
-            r00, // r
-            g00, // g
-            b00, // b
-            a00, // alpha
-            rgb0123, rgb4567, // result
-            ggbb, gbgb // temp
-        );
-
-        packResult<COLOR_DST_FMT>(
-            r01, // r
-            g01, // g
-            b01, // b
-            a01, // alpha
-            rgb89ab, rgbcdef, // result
-            ggbb, gbgb // temp
+        packResult<COLOR_DST_FMT, ALPHAMODE>(
+            r00, g00, b00, a00, // next 8 pixel
+            r01, g01, b01, a01, // next 8 pixel
+            rgb0123, rgb4567, rgb89ab, rgbcdef // result 16 pixel
         );
 
         // Store the finished 16 pixels
@@ -193,7 +218,6 @@ namespace VideoplayerPlugin
         _mm_store_si128( dstrgb128++, rgb4567 );
         _mm_store_si128( dstrgb128++, rgb89ab );
         _mm_store_si128( dstrgb128++, rgbcdef );
-        // That concludes the work necessary for row 0.
     }
 
 
@@ -213,13 +237,11 @@ namespace VideoplayerPlugin
         __m128i rv00, rv01, gu00, gu01, gv00, gv01, bu00, bu01;
         __m128i r00, r01, g00, g01, b00, b01, a00, a01;
         __m128i rgb0123, rgb4567, rgb89ab, rgbcdef;
-        __m128i ggbb, gbgb;
         __m128i ysub, uvsub;
         __m128i setall, zero, facy, facrv, facgu, facgv, facbu;
         __m128i* srcy128r0, *srcy128r1;
         __m128i* dstrgb128r0, *dstrgb128r1;
         __m64* srcu64, *srcv64;
-        int x, y;
 
         // Some necessary constants first
         ysub = _mm_set1_epi32( 0x00100010 );
@@ -232,28 +254,43 @@ namespace VideoplayerPlugin
         facbu = _mm_set1_epi32( 0x00810081 );
 
         zero  = _mm_set1_epi32( 0x00000000 );
-        setall = _mm_set1_epi32( 0xFFFFFFFF );
+        setall = _mm_set1_epi32( 0x0F0F0F0F );
         a00 = setall; // standard fill mode
         a01 = setall;
 
-        for ( y = 0; y < height; y += 2 )
+        // Precalculate offsets;
+        uint32_t offsetSrcY = ( sy - width ) + sy;
+        uint32_t offsetSrcUV = suv - width / 2;
+        uint32_t offsetDstRGB = ( srgb - width ) + srgb;
+        // offsetSrcY  // 1 byte luminance
+        offsetDstRGB *= 4; // 4 byte RGBA
+        offsetSrcY /= sizeof( __m128i );
+        offsetSrcUV /= sizeof( __m64 );
+        offsetDstRGB /= sizeof( __m128i );
+
+        uint32_t offsetRowEnd = width / sizeof( __m128i );
+
+        // Calculate Start
+        srcy128r0 = ( __m128i* )( yp );
+        srcy128r1 = ( __m128i* )( yp + sy );
+        srcu64 = ( __m64* )( up );
+        srcv64 = ( __m64* )( vp );
+        dstrgb128r0 = ( __m128i* )( rgb );
+        dstrgb128r1 = ( __m128i* )( rgb + srgb );
+
+        // Calculate End
+        __m128i* endDstRGB = ( __m128i* )( rgb + srgb * height ); // Image End
+        __m128i* endSrcY = srcy128r0 + offsetRowEnd; // Row End
+
+        // Process the whole image
+        while ( dstrgb128r0 != endDstRGB )
         {
-            // TODO can be optimized to use previous res
-            srcy128r0 = ( __m128i* )( yp + sy * y );
-            srcy128r1 = ( __m128i* )( yp + sy * y + sy );
-            srcu64 = ( __m64* )( up + suv * ( y / 2 ) );
-            srcv64 = ( __m64* )( vp + suv * ( y / 2 ) );
-
-            dstrgb128r0 = ( __m128i* )( rgb + srgb * y );
-            dstrgb128r1 = ( __m128i* )( rgb + srgb * y + srgb );
-
-            for ( x = 0; x < width; x += 16 )
+            // Process 2*16 pixel each step (completes 2 rows)
+            while ( srcy128r0 != endSrcY )
             {
                 // We start off by loading 8 bytes of data from u and v, and 16 from the two y rows. So we're processing 32 pixels at a time.
-                u0 = _mm_loadl_epi64( ( __m128i* )srcu64 );
-                ++srcu64;
-                v0 = _mm_loadl_epi64( ( __m128i* )srcv64 );
-                ++srcv64;
+                u0 = _mm_loadl_epi64( ( __m128i* )srcu64++ );
+                v0 = _mm_loadl_epi64( ( __m128i* )srcv64++ );
 
                 y0r0 = _mm_load_si128( srcy128r0++ );
                 y0r1 = _mm_load_si128( srcy128r1++ );
@@ -290,11 +327,22 @@ namespace VideoplayerPlugin
                 bu01 = _mm_mullo_epi16( facbu, u01 );
 
                 // row 0
-                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r0, y01r0, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ggbb, gbgb, ap, dstrgb128r0 );
+                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r0, y01r0, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ap, dstrgb128r0 );
 
                 // row 1
-                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r1, y01r1, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ggbb, gbgb, ap, dstrgb128r1 );
+                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r1, y01r1, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ap, dstrgb128r1 );
             }
+
+            // goto next row
+            srcy128r0 += offsetSrcY;
+            srcy128r1 += offsetSrcY;
+            srcu64 += offsetSrcUV;
+            srcv64 += offsetSrcUV;
+            dstrgb128r0 += offsetDstRGB;
+            dstrgb128r1 += offsetDstRGB;
+
+            // refresh row end
+            endSrcY = srcy128r0 + offsetRowEnd;
         }
     }
 
