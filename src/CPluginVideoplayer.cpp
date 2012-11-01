@@ -44,6 +44,11 @@ namespace VideoplayerPlugin
                     gVideoplayerSystem = NULL;
                 }
 
+                if ( gD3DSystem )
+                {
+                    PluginManager::safeReleasePlugin( "D3D", gD3DSystem );
+                }
+
                 // Cleanup like this always (since the class is static its cleaned up when the dll is unloaded)
                 gPluginManager->UnloadPlugin( GetName() );
 
@@ -74,7 +79,10 @@ namespace VideoplayerPlugin
     {
         if ( gEnv && gEnv->pSystem && !gEnv->pSystem->IsQuitting() && gVideoplayerSystem )
         {
-            gD3DSystem = PluginManager::safeGetPluginConcreteInterface<D3DPlugin::IPluginD3D*>( "D3D" );
+            if ( gPluginManager->GetPluginByName( "D3D" ) )
+            {
+                gD3DSystem = PluginManager::safeUsePluginConcreteInterface<D3DPlugin::IPluginD3D*>( "D3D" );
+            }
 
             gVideoplayerSystem->Initialize();
         }
