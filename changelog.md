@@ -1,4 +1,4 @@
-Videoplayer Plugin 1.6.2 (30.10.2012)
+Videoplayer Plugin 1.6.2 (02.11.2012)
 ==============
 Stable Release for 32/64 bit, FreeSDK 3.4.0 (DX9 & DX11), Plugin SDK 1.0
 
@@ -14,7 +14,7 @@ New:
 * Full sourcecode avaible under BSD-2 clause license
 
 Changes:
-* Improved SSE2 YUV conversion
+* Improved SSE2 YUV conversion (Performance: 2x1080p + 2x720p in parallel on i7-920 DX9 ~50fps DX11 ~25fps)
 * Less Console logging
 * New samples
 

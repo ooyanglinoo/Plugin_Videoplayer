@@ -1,5 +1,5 @@
 Videoplayer Plugin
-==================================================================================
+==================
 Copyright (c) 2012, The authors of the Videoplayer Plugin project
 All rights reserved.
 
@@ -26,7 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 [This is the BSD 2-Clause License, http://opensource.org/licenses/BSD-2-Clause]
 
 libvpx (also see patents.txt)
-==================================================================================
+=============================
 Copyright (c) 2010, The WebM Project authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -57,63 +57,3 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-AUTHORS:
-Aaron Watry <awatry@gmail.com>
-Adrian Grange <agrange@google.com>
-Alex Converse <alex.converse@gmail.com>
-Alexis Ballier <aballier@gentoo.org>
-Alok Ahuja <waveletcoeff@gmail.com>
-Alpha Lam <hclam@google.com>
-Andoni Morales Alastruey <ylatuya@gmail.com>
-Andres Mejia <mcitadel@gmail.com>
-Aron Rosenberg <arosenberg@logitech.com>
-Attila Nagy <attilanagy@google.com>
-Deb Mukherjee <debargha@google.com>
-Fabio Pedretti <fabio.ped@libero.it>
-Frank Galligan <fgalligan@google.com>
-Fredrik Söderquist <fs@opera.com>
-Fritz Koenig <frkoenig@google.com>
-Gaute Strokkenes <gaute.strokkenes@broadcom.com>
-Giuseppe Scrivano <gscrivano@gnu.org>
-Guillermo Ballester Valor <gbvalor@gmail.com>
-Henrik Lundin <hlundin@google.com>
-James Berry <jamesberry@google.com>
-James Zern <jzern@google.com>
-Jan Kratochvil <jan.kratochvil@redhat.com>
-Jeff Faust <jfaust@google.com>
-Jeff Muizelaar <jmuizelaar@mozilla.com>
-Jim Bankoski <jimbankoski@google.com>
-Johann Koenig <johannkoenig@google.com>
-John Koleszar <jkoleszar@google.com>
-Joshua Bleecher Snyder <josh@treelinelabs.com>
-Justin Clift <justin@salasaga.org>
-Justin Lebar <justin.lebar@gmail.com>
-Lou Quillio <louquillio@google.com>
-Luca Barbato <lu_zero@gentoo.org>
-Makoto Kato <makoto.kt@gmail.com>
-Martin Ettl <ettl.martin78@googlemail.com>
-Michael Kohler <michaelkohler@live.com>
-Mike Hommey <mhommey@mozilla.com>
-Mikhal Shemer <mikhal@google.com>
-Pascal Massimino <pascal.massimino@gmail.com>
-Patrik Westin <patrik.westin@gmail.com>
-Paul Wilkins <paulwilkins@google.com>
-Pavol Rusnak <stick@gk2.sk>
-Philip Jägenstedt <philipj@opera.com>
-Rafael Ávila de Espíndola <rafael.espindola@gmail.com>
-Rafaël Carré <funman@videolan.org>
-Ralph Giles <giles@xiph.org>
-Ronald S. Bultje <rbultje@google.com>
-Scott LaVarnway <slavarnway@google.com>
-Stefan Holmer <holmer@google.com>
-Taekhyun Kim <takim@nvidia.com>
-Tero Rintaluoma <teror@google.com>
-Thijs Vermeir <thijsvermeir@gmail.com>
-Timothy B. Terriberry <tterribe@xiph.org>
-Tom Finegan <tomfinegan@google.com>
-Yaowu Xu <yaowu@google.com>
-Yunqing Wang <yunqingwang@google.com>
-Google Inc.
-The Mozilla Foundation
-The Xiph.Org Foundation

@@ -1,7 +1,7 @@
 Videoplayer-Plugin
 ==================
 
-Videoplayer Plugin for CryEngine featuring WebM, DirectX 9, DirectX 11 Support
+Videoplayer for CryEngine featuring WebM, DirectX 9, DirectX 11 Support
 
 Features
 --------
@@ -17,19 +17,6 @@ Features
 * Playlists (for videos and console commands e.g. loading a map as mainmenu background)
 * Flowgraphnodes
 * C++ Interface
-
-Release Notes (V1.6.2)
-==============
-Stable Release tested with:
-* CryEngine 3 FreeSDK Version 3.4.0
-* DirectX 11 and 9
-* 32 and 64 Bit
-* Plugin SDK Version 1.0
-
-This shouldn't be an issue anymore in the next FreeSDK version
---------------------
-* Plugin is partly disabled in Launcher (32 bit) when using DX11 (ingame white texture, splashscreens work)
-* Known DX11 CryEngine3 FreeSDK 3.4 Bug (don't reload your map)
 
 Tutorial videos
 ===============
@@ -52,27 +39,24 @@ Designers
 
 Developers
 ----------
-* If you want to use video functions using C++ please clone the latest stable branch and add the "..\Plugin_Videoplayer\inc" path to your include directories
+* If you want to extend video functions using C++ or recompile the plugin please clone the latest stable branch
+  and add ```;$(SolutionDir)..\Plugin_Videoplayer\inc``` path to your include directories
 * For the Debug Configuration please download the [DirectX SDK](http://www.microsoft.com/en-us/download/details.aspx?id=6812)
 
 CVars
 =====
-* ```vp_playbackmode``` Editor Playbackmode
-  * 0 Restore materials to their orginal state when exiting game mode (Default)
-  * 1 Don't restore materials when exiting the game mode
-  * 2 Don't restore materials and keep videos playing when exiting the game mode<br/>
-    **This mode is dangerous and resource intensive, so use it wisely**
-
-* ```vp_seekthreshold``` Synchronization Seek Threshold<br/>
-  Start seeking when detecting at least x second lag (Default 5 seconds)
-
-* ```vp_dropthreshold``` Synchronization Drop Threshold<br/>
-  Start dropping when detecting at least x second lag (Default 0.1 seconds)
-
-* ```vp_dropmaxduration``` Synchronization Maximal Drop Duration<br/>
-  Maximal duration in seconds to drop before outputing at least one frame (Default 0.1 seconds)
+* See [Wiki: CVar Commands](https://github.com/hendrikp/Plugin_SDK/wiki/CVar-Commands)
 
 Flownodes
 =========
-TODO: Describe the flownodes inside your plugin
+* See [Wiki: Flownodes](https://github.com/hendrikp/Plugin_SDK/wiki/Flownodes)
 
+Playlists
+=========
+* See [Wiki: Autoevent Playlists](https://github.com/hendrikp/Plugin_Videoplayer/wiki/Autoevent-Playlists)
+* See [Wiki: Playlist XML Format](https://github.com/hendrikp/Plugin_Videoplayer/wiki/Playlist-XML-Format)
+
+Contributing
+============
+* See [Plugin SDK Wiki: Contribution Guideline](https://github.com/hendrikp/Plugin_SDK/wiki/Contribution-Guideline)
+* [Wishes / Issues](https://github.com/hendrikp/Plugin_Videoplayer/issues)
