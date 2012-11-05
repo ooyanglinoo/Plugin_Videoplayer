@@ -137,7 +137,7 @@ namespace VideoplayerPlugin
         r = _mm_packus_epi16( r, r1 );         // rrrr.. saturated
         g = _mm_packus_epi16( g, g1 );         // gggg.. saturated
         b = _mm_packus_epi16( b, b1 );         // bbbb.. saturated
-        // alpha not needed for fill
+        g1 = _mm_packus_epi16( a, a1 );         // aaaa.. saturated
     }
 
 #undef PARAMS
@@ -215,10 +215,13 @@ namespace VideoplayerPlugin
         );
 
         // calculate alpha
-        calcAlpha<ALPHAMODE>( r00, g00, b00, a00, y00r0 /*a0r0*/, ap );
-        calcAlpha<ALPHAMODE>( r01, g01, b01, a01, y01r0 /*a0r0*/, ap );
+        //calcAlpha<ALPHAMODE>( r00, g00, b00, a00, y00r0 /*a0r0*/, ap );
+        //calcAlpha<ALPHAMODE>( r01, g01, b01, a01, y01r0 /*a0r0*/, ap );
         //r00 = g00 = b00 = a00;
         //r01 = g01 = b01 = a01;
+
+        calcAlpha<ALPHAMODE>( r00, g00, b00, a00, a0r0, ap );
+        calcAlpha<ALPHAMODE>( r01, g01, b01, a01, a0r1, ap );
 
         // The remaining challenge is saturating and packing the results into chunky pixels efficiently.
         packResult<COLOR_DST_FMT, ALPHAMODE>(
