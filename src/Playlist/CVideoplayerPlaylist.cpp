@@ -128,6 +128,7 @@ namespace VideoplayerPlugin
 #define XML_OUTPUT "output"
 #define XML_ONENDSHOWMENU "onendshowmenu"
 
+#define XML_IF "if"
 #define XML_COMMAND "command"
 #define XML_DELAYFRAMES "delayframes"
 #define XML_DELAYSECONDS "delayseconds"
@@ -473,6 +474,33 @@ namespace VideoplayerPlugin
         return bRet;
     }
 
+    /**
+    * @brief Test a Lua Condition
+    * @param xmlInput Current XML Node
+    * @return success true
+    */
+    bool IfCondition( XmlNodeRef xmlNode )
+    {
+        bool bRet = true; // Return true if no condition exists
+
+        if ( xmlNode && gPluginManager )
+        {
+            string sCondition = SGetAttr( xmlNode, XML_IF, string( "" ) ).Trim();
+
+            if ( sCondition.length() > 0 )
+            {
+                bRet =  gPluginManager->TestLuaLogic( sCondition.c_str() );
+            }
+        }
+
+        return bRet;
+    }
+
+    /**
+    * @brief Execute a Command / Lua
+    * @param xmlInput Current XML Node
+    * @return success true
+    */
     bool SceneCommand( XmlNodeRef xmlInput )
     {
         bool bRet = false;
@@ -519,6 +547,7 @@ namespace VideoplayerPlugin
             {
                 gPlugin->LogWarning( "Playlist Scene Command empty near XML Line %d", xmlInput->getLine() );
             }
+
         }
 
         return bRet;
@@ -538,17 +567,23 @@ namespace VideoplayerPlugin
 
             for ( int iInput = 0; iInput < iInputCount; ++iInput )
             {
-                vInputs.push_back( SSceneInput() );
-
                 XmlNodeRef xmlChild = xmlScene->getChild( iInput );
 
-                bRet = vInputs.back().init( xmlChild, pPlaylist );
-                bRet |= bRet || SceneCommand( xmlChild );
-
-                if ( !bRet )
+                if ( IfCondition( xmlChild ) )
                 {
-                    gPlugin->LogError( "Playlist Scene XML not valid near XML Line %d", xmlChild ? xmlChild->getLine() : xmlScene->getLine() );
-                    break;
+                    bRet = SceneCommand( xmlChild );
+
+                    if ( !bRet )
+                    {
+                        vInputs.push_back( SSceneInput() );
+                        bRet = vInputs.back().init( xmlChild, pPlaylist );
+
+                        if ( !bRet )
+                        {
+                            gPlugin->LogError( "Playlist Scene XML not valid near XML Line %d", xmlChild ? xmlChild->getLine() : xmlScene->getLine() );
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -646,7 +681,17 @@ namespace VideoplayerPlugin
             if ( m_iScene < m_iSceneCount )
             {
                 XmlNodeRef xmlScene = m_xmlPlaylist->getChild( m_iScene++ );
-                bRet = m_CurrentScene.init( xmlScene, this );
+
+                if ( IfCondition( xmlScene ) )
+                {
+                    bRet = m_CurrentScene.init( xmlScene, this );
+                }
+
+                else
+                {
+                    // The condition for this scene is not met, read the next one if present
+                    return readNextScene();
+                }
             }
 
             if ( !bRet )
