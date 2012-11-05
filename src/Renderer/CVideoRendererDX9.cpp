@@ -105,7 +105,7 @@ namespace VideoplayerPlugin
 
         if ( pD3D )
         {
-            HRESULT hr = m_pD3DDevice->CreateTexture( nTargetWidth, nTargetHeight, 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &m_pTex, NULL );
+            HRESULT hr = m_pD3DDevice->CreateTexture( nTargetWidth, nTargetHeight, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &m_pTex, NULL );
 
             // Directly locking this was doesn't perform at all and brought some problems so use a staging texture
             //HRESULT hr = m_pD3DDevice->CreateTexture((nSourceWidth >> RESBASE) << RESBASE, (nSourceHeight >> RESBASE) << RESBASE, 1, D3DUSAGE_DYNAMIC, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &m_pTex, NULL);
@@ -147,9 +147,9 @@ namespace VideoplayerPlugin
 #endif
 
 #if !defined(USE_UPDATE_SURFACE)
-                    hr = m_pD3DDevice->CreateOffscreenPlainSurface( nSourceWidth, nSourceHeight, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &m_pStagingSurface, NULL );
+                    hr = m_pD3DDevice->CreateOffscreenPlainSurface( nSourceWidth, nSourceHeight, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &m_pStagingSurface, NULL );
 #else
-                    hr = m_pD3DDevice->CreateOffscreenPlainSurface( nSourceWidth, nSourceHeight, D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &m_pStagingSurface, NULL );
+                    hr = m_pD3DDevice->CreateOffscreenPlainSurface( nSourceWidth, nSourceHeight, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &m_pStagingSurface, NULL );
 #endif
 
                     if ( FAILED( hr ) || !m_pStagingSurface )
@@ -162,7 +162,7 @@ namespace VideoplayerPlugin
 
                 if ( m_pSurfaceYUV || m_pStagingSurface )
                 {
-                    ITexture* pTex = gD3DSystem->InjectTexture( m_pTex, nTargetWidth, nTargetHeight, eTF_X8R8G8B8, FT_USAGE_RENDERTARGET );
+                    ITexture* pTex = gD3DSystem->InjectTexture( m_pTex, nTargetWidth, nTargetHeight, eTF_A8R8G8B8, FT_USAGE_RENDERTARGET );
 
                     if ( pTex )
                     {
@@ -207,6 +207,7 @@ namespace VideoplayerPlugin
             vpx_image_t* img = ( vpx_image_t* )pData;
             SAlphaGenParam ap;
             YV12_2_TEX( img->planes[VPX_PLANE_Y], img->planes[VPX_PLANE_U], img->planes[VPX_PLANE_V], NULL, m_nSourceWidth, m_nSourceHeight, ( uint32_t* ) m_pData, m_nSourceWidth, img->stride[VPX_PLANE_Y], img->stride[VPX_PLANE_V], img->stride[VPX_PLANE_U], 0, ap );
+            //YV12_2_TEX( img->planes[VPX_PLANE_Y], img->planes[VPX_PLANE_U], img->planes[VPX_PLANE_V], img->planes[VPX_PLANE_Y], m_nSourceWidth, m_nSourceHeight, ( uint32_t* ) m_pData, m_nSourceWidth, img->stride[VPX_PLANE_Y], img->stride[VPX_PLANE_V], img->stride[VPX_PLANE_U], img->stride[VPX_PLANE_Y], ap );
             m_bDirty = true;
 #else
             D3DLOCKED_RECT LockedRect;

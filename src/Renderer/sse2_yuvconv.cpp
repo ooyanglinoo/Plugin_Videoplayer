@@ -32,6 +32,7 @@ namespace VideoplayerPlugin
         rtd r00, rtd r01, rtd g00, rtd g01, rtd b00, rtd b01 // result
     )
     {
+        // Shifts the 8 signed 16-bit integers in a right by count bits while shifting in the sign bit.
         r00 = _mm_srai_epi16( _mm_add_epi16( y00, rv00 ), 6 );
         r01 = _mm_srai_epi16( _mm_add_epi16( y01, rv01 ), 6 );
         g00 = _mm_srai_epi16( _mm_sub_epi16( _mm_sub_epi16( y00, gu00 ), gv00 ), 6 );
@@ -45,12 +46,22 @@ namespace VideoplayerPlugin
     rtd r, \
     rtd g, \
     rtd b, \
-    rtd a00, \
+    rtd a, \
+    rtd oa, \
     SAlphaGenParam& ap
 
     template<eAlphaMode ALPHAMODE>
     inline void calcAlpha( PARAMS )
     {}
+
+    template<>
+    inline void calcAlpha<VAM_PASSTROUGH>( PARAMS )
+    {
+        //8px
+        //a = oa;
+        a = _mm_srai_epi16( oa, 6 );//_mm_sub_epi16( _mm_set1_epi32( 0x77777777 ), oa );
+        //a = _mm_sub_epi8( _mm_set1_epi32( 0xFFFFFFFF ), oa );
+    }
 
     enum eInterleaveMode
     {
@@ -181,6 +192,7 @@ namespace VideoplayerPlugin
     rtd r00, rtd r01, \
     rtd g00, rtd g01, \
     rtd b00, rtd b01, \
+    rtd a0r0, rtd a0r1, \
     rtd a00, rtd a01, \
     rtd rgb0123, rtd rgb4567, \
     rtd rgb89ab, rtd rgbcdef, \
@@ -190,7 +202,7 @@ namespace VideoplayerPlugin
     template<eByteOrder COLOR_DST_FMT, eAlphaMode ALPHAMODE>
     inline void processRow( PARAMS )
     {
-        // row 0
+        // calculate 16 pixel in this row
 
         // Now it's trivial to calculate the r/g/b planar values by summing things together as specified and shifting down by 6,
         // the multiplier we used on the factors.
@@ -203,8 +215,10 @@ namespace VideoplayerPlugin
         );
 
         // calculate alpha
-        calcAlpha<ALPHAMODE>( r00, g00, b00, a00, ap );
-        calcAlpha<ALPHAMODE>( r01, g01, b01, a01, ap );
+        calcAlpha<ALPHAMODE>( r00, g00, b00, a00, y00r0 /*a0r0*/, ap );
+        calcAlpha<ALPHAMODE>( r01, g01, b01, a01, y01r0 /*a0r0*/, ap );
+        //r00 = g00 = b00 = a00;
+        //r01 = g01 = b01 = a01;
 
         // The remaining challenge is saturating and packing the results into chunky pixels efficiently.
         packResult<COLOR_DST_FMT, ALPHAMODE>(
@@ -220,11 +234,45 @@ namespace VideoplayerPlugin
         _mm_store_si128( dstrgb128++, rgbcdef );
     }
 
-
-    // orginal from yuv420_to_rgba8888 : http://www.ignorantus.com/yuv2rgb_sse2/index.html
 #undef PARAMS
-#define PARAMS uint8_t *yp, uint8_t *up, uint8_t *vp, \
-    uint32_t sy, uint32_t suv, \
+#define PARAMS \
+    rtdp srca128r0, \
+    rtdp srca128r1, \
+    uint32_t offsetSrcA
+
+    template<eAlphaMode ALPHAMODE>
+    inline void nextAlpha( PARAMS )
+    {}
+
+    template<>
+    inline void nextAlpha<VAM_PASSTROUGH>( PARAMS )
+    {
+        srca128r0 += offsetSrcA;
+        srca128r1 += offsetSrcA;
+    }
+
+#undef PARAMS
+#define PARAMS \
+    rtdp srca128r0, \
+    rtdp srca128r1, \
+    rtd a0r0, \
+    rtd a0r1, \
+    SAlphaGenParam& ap
+
+    template<eAlphaMode ALPHAMODE>
+    inline void loadAlpha( PARAMS )
+    {}
+
+    template<>
+    inline void loadAlpha<VAM_PASSTROUGH>( PARAMS )
+    {
+        a0r0 = _mm_load_si128( srca128r0++ );
+        a0r1 = _mm_load_si128( srca128r1++ );
+    }
+
+#undef PARAMS
+#define PARAMS uint8_t *yp, uint8_t *up, uint8_t *vp, uint8_t *yap, \
+    uint32_t sy, uint32_t suv, uint32_t sa, \
     int width, int height, \
     uint32_t *rgb, uint32_t srgb, SAlphaGenParam& ap
 
@@ -232,6 +280,7 @@ namespace VideoplayerPlugin
     inline void SSE2_YUV420_2_( PARAMS )
     {
         __m128i y0r0, y0r1, u0, v0;
+        __m128i a0r0, a0r1;
         __m128i y00r0, y01r0, y00r1, y01r1;
         __m128i u00, u01, v00, v01;
         __m128i rv00, rv01, gu00, gu01, gv00, gv01, bu00, bu01;
@@ -240,6 +289,7 @@ namespace VideoplayerPlugin
         __m128i ysub, uvsub;
         __m128i setall, zero, facy, facrv, facgu, facgv, facbu;
         __m128i* srcy128r0, *srcy128r1;
+        __m128i* srca128r0, *srca128r1;
         __m128i* dstrgb128r0, *dstrgb128r1;
         __m64* srcu64, *srcv64;
 
@@ -261,10 +311,12 @@ namespace VideoplayerPlugin
         // Precalculate offsets;
         uint32_t offsetSrcY = ( sy - width ) + sy;
         uint32_t offsetSrcUV = suv - width / 2;
+        uint32_t offsetSrcA = ( sa - width ) + sa;
         uint32_t offsetDstRGB = ( srgb - width ) + srgb;
         // offsetSrcY  // 1 byte luminance
         offsetDstRGB *= 4; // 4 byte RGBA
         offsetSrcY /= sizeof( __m128i );
+        offsetSrcA /= sizeof( __m128i );
         offsetSrcUV /= sizeof( __m64 );
         offsetDstRGB /= sizeof( __m128i );
 
@@ -273,6 +325,8 @@ namespace VideoplayerPlugin
         // Calculate Start
         srcy128r0 = ( __m128i* )( yp );
         srcy128r1 = ( __m128i* )( yp + sy );
+        srca128r0 = ( __m128i* )( yap );
+        srca128r1 = ( __m128i* )( yap + sa );
         srcu64 = ( __m64* )( up );
         srcv64 = ( __m64* )( vp );
         dstrgb128r0 = ( __m128i* )( rgb );
@@ -292,8 +346,15 @@ namespace VideoplayerPlugin
                 u0 = _mm_loadl_epi64( ( __m128i* )srcu64++ );
                 v0 = _mm_loadl_epi64( ( __m128i* )srcv64++ );
 
+                // Loads 128-bit value.
                 y0r0 = _mm_load_si128( srcy128r0++ );
                 y0r1 = _mm_load_si128( srcy128r1++ );
+
+                // Load Alpha if required
+                loadAlpha<ALPHAMODE>(
+                    srca128r0, srca128r1,
+                    a0r0, a0r1, ap
+                );
 
                 // Next, we expand to 16 bit, calculate the constant y factors, and subtract 16:
 
@@ -327,15 +388,16 @@ namespace VideoplayerPlugin
                 bu01 = _mm_mullo_epi16( facbu, u01 );
 
                 // row 0
-                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r0, y01r0, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ap, dstrgb128r0 );
+                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r0, y01r0, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a0r0, a0r1, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ap, dstrgb128r0 );
 
                 // row 1
-                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r1, y01r1, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ap, dstrgb128r1 );
+                processRow<COLOR_DST_FMT, ALPHAMODE>( y00r1, y01r1, rv00, rv01, gu00, gv00, gu01, gv01, bu00, bu01, r00, r01, g00, g01, b00, b01, a0r0, a0r1, a00, a01, rgb0123, rgb4567, rgb89ab, rgbcdef, ap, dstrgb128r1 );
             }
 
             // goto next row
             srcy128r0 += offsetSrcY;
             srcy128r1 += offsetSrcY;
+            nextAlpha<ALPHAMODE>( srca128r0, srca128r1, offsetSrcA );
             srcu64 += offsetSrcUV;
             srcv64 += offsetSrcUV;
             dstrgb128r0 += offsetDstRGB;
@@ -350,15 +412,17 @@ namespace VideoplayerPlugin
     {
         // force the compiler to include these template variations
         SAlphaGenParam d;
-        SSE2_YUV420_2_<VBO_RGBA, VAM_FILL>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_RGBA, VAM_PASSTROUGH>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_RGBA, VAM_FALLOF>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_RGBA, VAM_COLORMASK>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
+#define PARAMS 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, d
 
-        SSE2_YUV420_2_<VBO_BGRA, VAM_FILL>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_BGRA, VAM_PASSTROUGH>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_BGRA, VAM_FALLOF>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
-        SSE2_YUV420_2_<VBO_BGRA, VAM_COLORMASK>( 0, 0, 0, 0, 0, 0, 0, 0, 0, d );
+        SSE2_YUV420_2_<VBO_RGBA, VAM_FILL>( PARAMS );
+        SSE2_YUV420_2_<VBO_RGBA, VAM_PASSTROUGH>( PARAMS );
+        SSE2_YUV420_2_<VBO_RGBA, VAM_FALLOF>( PARAMS );
+        SSE2_YUV420_2_<VBO_RGBA, VAM_COLORMASK>( PARAMS );
+
+        SSE2_YUV420_2_<VBO_BGRA, VAM_FILL>( PARAMS );
+        SSE2_YUV420_2_<VBO_BGRA, VAM_PASSTROUGH>( PARAMS );
+        SSE2_YUV420_2_<VBO_BGRA, VAM_FALLOF>( PARAMS );
+        SSE2_YUV420_2_<VBO_BGRA, VAM_COLORMASK>( PARAMS );
     }
 
 }

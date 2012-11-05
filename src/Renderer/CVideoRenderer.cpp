@@ -116,7 +116,7 @@ namespace VideoplayerPlugin
         if ( ::IsProcessorFeaturePresent( PF_XMMI64_INSTRUCTIONS_AVAILABLE ) )
         {
             //SSE2 available
-            SSE2_YUV420_2_<COLOR_DST_FMT, ALPHAMODE>( y, u, v, srcStrideY, srcStrideV, cols, lines, dst, dstStride, ap );
+            SSE2_YUV420_2_<COLOR_DST_FMT, ALPHAMODE>( y, u, v, a, srcStrideY, srcStrideV, srcStrideA, cols, lines, dst, dstStride, ap );
             return;
         }
 
@@ -268,7 +268,7 @@ namespace VideoplayerPlugin
 
             else
             {
-                YV12_2_<VBO_RGBA, VAM_COLORMASK>( y, u, v, a, cols, lines, dst, dstStride, srcStrideY, srcStrideU, srcStrideV, srcStrideA, ap );
+                YV12_2_<VBO_RGBA, VAM_FILL>( y, u, v, a, cols, lines, dst, dstStride, srcStrideY, srcStrideU, srcStrideV, srcStrideA, ap );
             }
         }
 
@@ -281,7 +281,7 @@ namespace VideoplayerPlugin
 
             else
             {
-                YV12_2_<VBO_BGRA, VAM_COLORMASK>( y, u, v, a, cols, lines, dst, dstStride, srcStrideY, srcStrideU, srcStrideV, srcStrideA, ap );
+                YV12_2_<VBO_BGRA, VAM_FILL>( y, u, v, a, cols, lines, dst, dstStride, srcStrideY, srcStrideU, srcStrideV, srcStrideA, ap );
             }
         }
     }

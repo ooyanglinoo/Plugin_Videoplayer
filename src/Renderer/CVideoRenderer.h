@@ -76,8 +76,8 @@ namespace VideoplayerPlugin
     void YV12_2_TEX( unsigned char* y, unsigned char* u, unsigned char* v, unsigned char* a, unsigned int cols, unsigned int lines, uint32_t* dst, unsigned int dstStride, unsigned int srcStrideY, unsigned int srcStrideU, unsigned int srcStrideV, unsigned int srcStrideA, SAlphaGenParam& ap );
 
     template<eByteOrder COLOR_DST_FMT, eAlphaMode ALPHAMODE>
-    void SSE2_YUV420_2_( uint8_t* yp, uint8_t* up, uint8_t* vp,
-                         uint32_t sy, uint32_t suv,
+    void SSE2_YUV420_2_( uint8_t* yp, uint8_t* up, uint8_t* vp, uint8_t* yap,
+                         uint32_t sy, uint32_t suv, uint32_t sa,
                          int width, int height,
                          uint32_t* rgb, uint32_t srgb, SAlphaGenParam& ap );
 
