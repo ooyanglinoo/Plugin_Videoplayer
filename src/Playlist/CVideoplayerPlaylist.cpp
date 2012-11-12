@@ -130,6 +130,7 @@ namespace VideoplayerPlugin
 
 #define XML_IF "if"
 #define XML_COMMAND "command"
+#define XML_LUA "lua"
 #define XML_DELAYFRAMES "delayframes"
 #define XML_DELAYSECONDS "delayseconds"
 #define XML_DELAYFILTER "delayfilter"
@@ -507,6 +508,8 @@ namespace VideoplayerPlugin
 
         if ( xmlInput && xmlInput->isTag( XML_COMMAND ) )
         {
+            string sClass = SGetAttr( xmlInpit, XML_CLASS, XML_COMMAND ).ToLower();
+
             string sCommand = SGetContent( xmlInput, "" ).Trim();
 
             if ( sCommand.length() > 0 )
@@ -530,16 +533,32 @@ namespace VideoplayerPlugin
                     }
                 }
 
-                if ( eType == PluginManager::CallDelay::eDT_None )
-                {
-                    gEnv->pConsole->ExecuteString( sCommand );
-                }
+		if(sClass == XML_LUA)
+		{
+			if ( eType == PluginManager::CallDelay::eDT_None )
+			{
+			    gPluginManager->RunLua( sCommand );
+			}
 
-                else
-                {
-                    gPluginManager->DelayCommand( sCommand, SGetAttr( xmlInput, XML_DELAYFILTER, string( "" ) ) , fDelay, eType );
-                }
+			else
+			{
+			    gPluginManager->DelayLua( sCommand, SGetAttr( xmlInput, XML_DELAYFILTER, string( "" ) ) , fDelay, eType );
+			}
+		}
+		
+		else
+		{
+			if ( eType == PluginManager::CallDelay::eDT_None )
+			{
+			    gEnv->pConsole->ExecuteString( sCommand );
+			}
 
+			else
+			{
+			    gPluginManager->DelayCommand( sCommand, SGetAttr( xmlInput, XML_DELAYFILTER, string( "" ) ) , fDelay, eType );
+			}
+		}
+		
                 bRet = true;
             }
 
