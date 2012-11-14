@@ -40,7 +40,7 @@ namespace VideoplayerPlugin
 
             const char* GetVersion() const
             {
-                return "1.6.2.0";
+                return "1.7.0.0";
             };
 
             const char* GetName() const
