@@ -380,10 +380,10 @@ namespace VideoplayerPlugin
                             fArea.y,
                             fArea.w,
                             fArea.h,
-#ifdef SDK_VERSION_339
-                            -1,
-#else
+#ifdef SDK_VERSION_340
                             gEnv->pRenderer->GetWhiteTextureId(),
+#else
+                            -1,
 #endif
                             0, 1, 1, 0,
                             info.fAngle,
@@ -414,10 +414,10 @@ namespace VideoplayerPlugin
                             fArea.y,
                             fArea.w,
                             fArea.h,
-#ifdef SDK_VERSION_339
-                            -1,
-#else
+#ifdef SDK_VERSION_340
                             gEnv->pRenderer->GetWhiteTextureId(),
+#else
+                            -1,
 #endif
                             0, 1, 1, 0,
                             info.fAngle,

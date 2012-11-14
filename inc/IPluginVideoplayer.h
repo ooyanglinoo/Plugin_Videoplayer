@@ -3,7 +3,6 @@
 #pragma once
 
 #include <IPluginBase.h>
-//
 #include <IRenderer.h>
 
 #define AUTOPLAY_SPLASHSCREEN "Videos/Auto_Start.xml" //!< Automatically triggered playlist on game startup (splashscreen)
@@ -22,10 +21,8 @@
 #define DROP_THRESHOLD 0.1f //!< Start dropping frames when detecting at least 100ms lag
 #define SEEK_THRESHOLD 5.0f //!< Start seeking when detecting at least 5s lag
 
-// CryEngine internal stuff that was just exposed in version 3.4
-// for backward compatibility defines those values here
-#ifndef R_DX11_RENDERER
-#define SDK_VERSION_339 1 //!< Further special handling of old SDK releases.
+// CryEngine internal stuff that was just exposed in version 3.4 for backward compatibility defines those values here
+#ifndef SDK_VERSION_340
 #define VIRTUAL_SCREEN_WIDTH 800.0f //!< Width of the virtual screen, inside the plugin relative sizes are used.
 #define VIRTUAL_SCREEN_HEIGHT 600.0f //!< Height of the virtual screen, inside the plugin relative sizes are used.
 #endif
