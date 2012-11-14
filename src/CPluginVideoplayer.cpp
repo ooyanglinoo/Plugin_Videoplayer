@@ -92,7 +92,7 @@ namespace VideoplayerPlugin
 
     const char* CPluginVideoplayer::ListCVars() const
     {
-        return "..."; // TODO: Enter CVARs/Commands here if you have some
+        return "vp_playbackmode, vp_seekthreshold, vp_dropthreshold, vp_dropmaxduration";
     }
 
     const char* CPluginVideoplayer::GetStatus() const

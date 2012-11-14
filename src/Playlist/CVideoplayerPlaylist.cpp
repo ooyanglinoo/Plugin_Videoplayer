@@ -274,7 +274,7 @@ namespace VideoplayerPlugin
         if ( m_bShowMenuOnEnd )
         {
             // Show menu in the next frame
-            gPluginManager->DelayFunction( "delaymenu", &_DelayMenuShow, NULL, NULL, 0, PluginManager::CallDelay::eDT_Frames );
+            gPluginManager->DelayFunction( "delaymenu", &_DelayMenuShow, NULL, NULL, 0, PluginManager::eDT_Frames );
         }
 
         m_CurrentScene.reset();
@@ -508,19 +508,19 @@ namespace VideoplayerPlugin
 
         if ( xmlInput && xmlInput->isTag( XML_COMMAND ) )
         {
-            string sClass = SGetAttr( xmlInpit, XML_CLASS, XML_COMMAND ).ToLower();
+            string sClass = SGetAttr<string>( xmlInput, XML_CLASS, string( XML_COMMAND ) ).MakeLower();
 
             string sCommand = SGetContent( xmlInput, "" ).Trim();
 
             if ( sCommand.length() > 0 )
             {
-                PluginManager::CallDelay::eDelayType eType = PluginManager::CallDelay::eDT_None;
+                PluginManager::eDelayType eType = PluginManager::eDT_None;
 
                 float fDelay = SGetAttr( xmlInput, XML_DELAYFRAMES, -1.0f );
 
                 if ( fDelay > 0 )
                 {
-                    eType = PluginManager::CallDelay::eDT_Frames;
+                    eType = PluginManager::eDT_Frames;
                 }
 
                 else
@@ -529,36 +529,36 @@ namespace VideoplayerPlugin
 
                     if ( fDelay > 0 )
                     {
-                        eType = PluginManager::CallDelay::eDT_Seconds;
+                        eType = PluginManager::eDT_Seconds;
                     }
                 }
 
-		if(sClass == XML_LUA)
-		{
-			if ( eType == PluginManager::CallDelay::eDT_None )
-			{
-			    gPluginManager->RunLua( sCommand );
-			}
+                if ( sClass == XML_LUA )
+                {
+                    if ( eType == PluginManager::eDT_None )
+                    {
+                        gPluginManager->RunLua( sCommand );
+                    }
 
-			else
-			{
-			    gPluginManager->DelayLua( sCommand, SGetAttr( xmlInput, XML_DELAYFILTER, string( "" ) ) , fDelay, eType );
-			}
-		}
-		
-		else
-		{
-			if ( eType == PluginManager::CallDelay::eDT_None )
-			{
-			    gEnv->pConsole->ExecuteString( sCommand );
-			}
+                    else
+                    {
+                        gPluginManager->DelayLua( sCommand, SGetAttr( xmlInput, XML_DELAYFILTER, string( "" ) ) , fDelay, eType );
+                    }
+                }
 
-			else
-			{
-			    gPluginManager->DelayCommand( sCommand, SGetAttr( xmlInput, XML_DELAYFILTER, string( "" ) ) , fDelay, eType );
-			}
-		}
-		
+                else
+                {
+                    if ( eType == PluginManager::eDT_None )
+                    {
+                        gEnv->pConsole->ExecuteString( sCommand );
+                    }
+
+                    else
+                    {
+                        gPluginManager->DelayCommand( sCommand, SGetAttr( xmlInput, XML_DELAYFILTER, string( "" ) ) , fDelay, eType );
+                    }
+                }
+
                 bRet = true;
             }
 

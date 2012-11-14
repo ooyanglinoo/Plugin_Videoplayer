@@ -415,6 +415,7 @@ namespace VideoplayerPlugin
     {
         // force the compiler to include these template variations
         SAlphaGenParam d;
+#undef PARAMS
 #define PARAMS 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, d
 
         SSE2_YUV420_2_<VBO_RGBA, VAM_FILL>( PARAMS );
