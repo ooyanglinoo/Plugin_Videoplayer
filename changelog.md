@@ -1,3 +1,11 @@
+Videoplayer Plugin 1.7 (19.11.2012)
+==============
+Stable Release for CryEngine 3.4.3 (32/64 bit, DX9 & DX11), Plugin SDK 1.1
+
+New:
+* Support for CryEngine 3.4.3
+* Support for playlist lua commands and conditions
+
 Videoplayer Plugin 1.6.2 (02.11.2012)
 ==============
 Stable Release for 32/64 bit, FreeSDK 3.4.0 (DX9 & DX11), Plugin SDK 1.0
