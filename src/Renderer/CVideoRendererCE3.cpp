@@ -68,9 +68,9 @@ namespace VideoplayerPlugin
 
 #if !defined(VP_DISABLE_RESOURCE)
 #if defined(USE_LOCK_RECT)
-        m_iTex = gEnv->pRenderer->SF_CreateTexture( m_nSourceWidth, m_nSourceHeight, 1, m_pData, eTF_X8R8G8B8,  0 );
+        m_iTex = gEnv->pRenderer->SF_CreateTexture( m_nSourceWidth, m_nSourceHeight, 1, m_pData, eTF_X8R8G8B8, 0 | FT_FILTER_BILINEAR );
 #else
-        m_iTex = gEnv->pRenderer->SF_CreateTexture( m_nSourceWidth, m_nSourceHeight, 1, m_pData, eTF_X8R8G8B8, FT_USAGE_DYNAMIC );
+        m_iTex = gEnv->pRenderer->SF_CreateTexture( m_nSourceWidth, m_nSourceHeight, 1, m_pData, eTF_X8R8G8B8, FT_USAGE_DYNAMIC | FT_FILTER_BILINEAR );
 #endif
 #endif
         return bMemSuccess && m_pData && m_iTex > 0;
