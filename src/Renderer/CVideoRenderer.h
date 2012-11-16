@@ -12,6 +12,8 @@
 #define USE_ALIGNEDMEMORY // for sse functions
 #define ALIGNEDMEMORY 16
 
+#define VIDEO_TEXTURE_FLAGS FILTER_LINEAR | FT_DONT_STREAM | FT_NOMIPS // | FT_DONT_RESIZE // doesn't help for old hardware and on new one we support resized textures anyways (the excess area wont be used)
+
 namespace VideoplayerPlugin
 {
     /**

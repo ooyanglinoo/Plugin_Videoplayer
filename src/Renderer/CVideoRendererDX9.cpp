@@ -162,7 +162,7 @@ namespace VideoplayerPlugin
 
                 if ( m_pSurfaceYUV || m_pStagingSurface )
                 {
-                    ITexture* pTex = gD3DSystem->InjectTexture( m_pTex, nTargetWidth, nTargetHeight, eTF_A8R8G8B8, FT_USAGE_RENDERTARGET | FT_FILTER_BILINEAR );
+                    ITexture* pTex = gD3DSystem->InjectTexture( m_pTex, nTargetWidth, nTargetHeight, eTF_A8R8G8B8, FT_USAGE_RENDERTARGET | VIDEO_TEXTURE_FLAGS );
 
                     if ( pTex )
                     {
