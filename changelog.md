@@ -5,6 +5,10 @@ Stable Release for CryEngine 3.4.3 (32/64 bit, DX9 & DX11), Plugin SDK 1.1
 New:
 * Support for CryEngine 3.4.3
 * Support for playlist lua commands and conditions
+* Texture filter now configurable (Nearest or Linear), Linear is the new default
+
+Known Limitations:
+* Plugin is partly disabled in 32bit launcher when using DX11
 
 Videoplayer Plugin 1.6.2 (02.11.2012)
 ==============
