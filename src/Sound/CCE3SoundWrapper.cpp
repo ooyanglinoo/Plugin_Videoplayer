@@ -84,13 +84,19 @@ namespace VideoplayerPlugin
 
     void SSoundEntity::Close()
     {
-        if ( gEnv->pSystem && !gEnv->pSystem->IsQuitting() )
+        if ( gEnv && gEnv->pSystem && !gEnv->pSystem->IsQuitting() )
         {
             // If not quitting (releasing stuff while quitting is pointless and dangerous since its going to be released automatically and might already be released)
             if ( pSoundProxy && nSoundID != INVALID_SOUNDID && gEnv->pSoundSystem->GetSound( nSoundID ) )
             {
                 pSoundProxy->SetStaticSound( nSoundID, false ); // probably static sound meant or means that its always loaded
                 pSoundProxy->StopSound( nSoundID, ESoundStopMode_AtOnce );
+            }
+
+            if ( gEnv->pEntitySystem && pEntity && bEntityListenerInstalled )
+            {
+                gEnv->pEntitySystem->RemoveEntityEventListener( pEntity->GetId(), ENTITY_EVENT_DONE, this );
+                bEntityListenerInstalled = false;
             }
         }
 
@@ -164,8 +170,46 @@ namespace VideoplayerPlugin
         }
     }
 
+    void SSoundEntity::Set( IEntity* _pEntity, Vec3 _vOffset, Vec3 _vDirection, uint32 _nSoundFlags, float _fVolume, float _fMinRadius, float _fMaxRadius, ESoundSemantic _eSemantic )
+    {
+        if ( _pEntity )
+        {
+            this->pSound = NULL;
+            this->vOffset = _vOffset;
+            this->vDirection = _vDirection;
+            this->nSoundFlags = _nSoundFlags;
+            this->fVolume = _fVolume;
+            this->fMinRadius = _fMinRadius;
+            this->fMaxRadius = _fMaxRadius;
+            this->eSemantic = _eSemantic;
 
+            // Soundproxy and listeners only need to be created if entity is a new one
+            if ( _pEntity != this->pEntity )
+            {
+                if ( this->pEntity )
+                {
+                    if ( bEntityListenerInstalled )
+                    {
+                        gEnv->pEntitySystem->RemoveEntityEventListener( this->pEntity->GetId(), ENTITY_EVENT_DONE, this );
+                        bEntityListenerInstalled = false;
+                    }
 
+                    this->pEntity = NULL;
+                }
+
+                this->pEntity = _pEntity;
+                gEnv->pEntitySystem->AddEntityEventListener( this->pEntity->GetId(), ENTITY_EVENT_DONE, this );
+                bEntityListenerInstalled = true;
+
+                this->pSoundProxy = ( IEntitySoundProxy* )this->pEntity->GetProxy( ENTITY_PROXY_SOUND );
+
+                if ( !this->pSoundProxy )
+                {
+                    this->pSoundProxy = ( IEntitySoundProxy* )this->pEntity->CreateProxy( ENTITY_PROXY_SOUND );
+                }
+            }
+        }
+    }
 
     CCE3SoundWrapper::CCE3SoundWrapper()
     {
@@ -313,7 +357,7 @@ namespace VideoplayerPlugin
         {
             SSoundEntity& se = iterSound->second;
             se.Resume( m_sSoundOrEvent, m_pSyncTimesource->GetPosition() );
-            RefreshMaxDuration( se.pSound );
+            RefreshMaxDuration( se.GetSound() );
         }
 
         // goto position of sync target
@@ -393,17 +437,18 @@ namespace VideoplayerPlugin
         // Or one from the proxies
         for ( tEntitySoundProxyMap::iterator iterSound = m_SoundProxies.begin(); iterSound != m_SoundProxies.end(); ++iterSound )
         {
-            if ( iterSound->second.IsActive() && PLAYSTATE_CONSISTENT( iterSound->second.pSound ) )
+            if ( iterSound->second.IsActive() && PLAYSTATE_CONSISTENT( iterSound->second.GetSound() ) )
             {
-                m_nPreferredDataSource = iterSound->second.pSound->GetId();
-                pPreferredSound = iterSound->second.pSound;
+                pPreferredSound = iterSound->second.GetSound();
+                m_nPreferredDataSource = pPreferredSound->GetId();
+
                 goto success;
             }
 
             // better then nothing...
             if ( !pFallbackSound && iterSound->second.IsExisting() )
             {
-                pFallbackSound = iterSound->second.pSound;
+                pFallbackSound = iterSound->second.GetSound();
             }
         }
 
@@ -531,23 +576,8 @@ success:
                     // if this worked initialize the sound proxy
                     SSoundEntity& se = iter->second;
 
-                    se.pSoundProxy = ( IEntitySoundProxy* )pEntity->GetProxy( ENTITY_PROXY_SOUND );
-
-                    if ( !se.pSoundProxy )
-                    {
-                        se.pSoundProxy = ( IEntitySoundProxy* )pEntity->CreateProxy( ENTITY_PROXY_SOUND );
-                    }
-
-                    // set infos for resume
-                    se.pSound       = NULL;
-                    se.pEntity      = pEntity;
-                    se.vOffset      = vOffset;
-                    se.vDirection   = vDirection;
-                    se.nSoundFlags  = SOUNDFLAGS( nSoundFlags | FLAG_SOUND_START_PAUSED ); // internally always start paused
-                    se.fVolume      = fVolume;
-                    se.fMinRadius   = fMinRadius;
-                    se.fMaxRadius   = fMaxRadius;
-                    se.eSemantic    = eSemantic;
+                    // set infos for resume (internally always start paused)
+                    se.Set( pEntity, vOffset, vDirection, SOUNDFLAGS( nSoundFlags | FLAG_SOUND_START_PAUSED ), fVolume, fMinRadius, fMaxRadius, eSemantic );
 
                     if ( !m_bPaused )
                     {
@@ -567,7 +597,7 @@ success:
         {
             // proxy was found so delete it
 
-            if ( iter->second.pSound && m_nPreferredDataSource == iter->second.pSound->GetId() )
+            if ( iter->second.GetSound() && m_nPreferredDataSource == iter->second.GetSound()->GetId() )
             {
                 // this proxy was the current preferred source
 

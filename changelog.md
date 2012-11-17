@@ -6,6 +6,10 @@ New:
 * Support for CryEngine 3.4.3
 * Support for playlist lua commands and conditions
 * Texture filter now configurable (Nearest or Linear), Linear is the new default
+* Installer
+
+Fixes:
+* Now handles entity deletion if sound was playing on entity (possible crash)
 
 Known Limitations:
 * Plugin is partly disabled in 32bit launcher when using DX11

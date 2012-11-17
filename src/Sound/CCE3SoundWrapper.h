@@ -10,77 +10,118 @@ namespace VideoplayerPlugin
     /**
     * @brief Holds information about a entity proxy
     */
-    struct SSoundEntity
+    struct SSoundEntity : public IEntityEventListener
     {
-        SSoundEntity() :
-            pEntity( NULL ),
-            pSoundProxy( NULL ),
-            nSoundID( INVALID_SOUNDID ),
-            pSound( NULL ),
-            vOffset( Vec3( 0, 0, 0 ) ),
-            vDirection( Vec3( 0, 0, 0 ) ),
-            nSoundFlags( 0 ),
-            fVolume( -1 ),
-            fMinRadius( -1 ),
-            fMaxRadius( -1 ),
-            eSemantic( eSoundSemantic_None )
-        {};
+        private:
+            IEntity* pEntity; //!< affected entity
+            IEntitySoundProxy* pSoundProxy; //!< current soundproxy for this sound and entity
+            tSoundID nSoundID; //!< sound id of current sound
+            ISound* pSound; //! sound interface pointer
 
-        ~SSoundEntity();
+            Vec3 vOffset; //!< offset from the entity
+            Vec3 vDirection; //!< sound direction
+            uint32 nSoundFlags; //!< sound flags of this sound proxy
+            float fVolume; //!< overall volume of this sound
+            float fMinRadius; //!< minimal radius this sound can be heared from (at full volume)
+            float fMaxRadius; //!< maximum radius in meters this sound proxy can be heared from (at low volume)
+            ESoundSemantic eSemantic; //!< sound semantic of this proxy
+            bool bEntityListenerInstalled; //!< entity listener present
 
-        /**
-        * @brief Soundproxy is playing
-        * @return playing
-        */
-        bool IsPlaying();
+        public:
+            SSoundEntity() :
+                pEntity( NULL ),
+                pSoundProxy( NULL ),
+                nSoundID( INVALID_SOUNDID ),
+                pSound( NULL ),
+                vOffset( Vec3( 0, 0, 0 ) ),
+                vDirection( Vec3( 0, 0, 0 ) ),
+                nSoundFlags( 0 ),
+                fVolume( -1 ),
+                fMinRadius( -1 ),
+                fMaxRadius( -1 ),
+                eSemantic( eSoundSemantic_None ),
+                bEntityListenerInstalled( false )
+            {};
 
-        /**
-        * @brief Soundproxy is active/present
-        * @return active
-        */
-        bool IsActive();
+            ~SSoundEntity();
 
-        /**
-        * @brief Soundproxy is at least existent
-        * @return existent
-        */
-        bool IsExisting();
+            /**
+            * @brief Soundproxy is playing
+            * @return playing
+            */
+            bool IsPlaying();
 
-        /**
-        * @brief Seek this soundproxy
-        * @param fPos Position in seconds
-        */
-        void Seek( float fPos );
+            /**
+            * @brief Soundproxy is active/present
+            * @return active
+            */
+            bool IsActive();
 
-        /**
-        * @brief Resume playback of a sound
-        * @param sSoundOrEvent path to sound or fmod event name
-        * @param fPos position in seconds
-        */
-        void Resume( const char* sSoundOrEvent, float fPos );
+            /**
+            * @brief Soundproxy is at least existent
+            * @return existent
+            */
+            bool IsExisting();
 
-        /**
-        * @brief stops the sound
-        */
-        void Close();
+            /**
+            * @brief Seek this soundproxy
+            * @param fPos Position in seconds
+            */
+            void Seek( float fPos );
 
-        /**
-        * @brief pauses the currently playing sound
-        */
-        void Pause();
+            /**
+            * @brief Resume playback of a sound
+            * @param sSoundOrEvent path to sound or fmod event name
+            * @param fPos position in seconds
+            */
+            void Resume( const char* sSoundOrEvent, float fPos );
 
-        IEntity* pEntity; //!< affected entity
-        IEntitySoundProxy* pSoundProxy; //!< current soundproxy for this sound and entity
-        tSoundID nSoundID; //!< sound id of current sound
-        ISound* pSound; //! sound interface pointer
+            /**
+            * @brief stops the sound
+            */
+            void Close();
 
-        Vec3 vOffset; //!< offset from the entity
-        Vec3 vDirection; //!< sound direction
-        uint32 nSoundFlags; //!< sound flags of this sound proxy
-        float fVolume; //!< overall volume of this sound
-        float fMinRadius; //!< minimal radius this sound can be heared from (at full volume)
-        float fMaxRadius; //!< maximum radius in meters this sound proxy can be heared from (at low volume)
-        ESoundSemantic eSemantic; //!< sound semantic of this proxy
+            /**
+            * @brief pauses the currently playing sound
+            */
+            void Pause();
+
+            /**
+            * @brief returns the associated sound interface
+            */
+            ISound* GetSound()
+            {
+                return pSound;
+            };
+
+            /**
+            * @brief Used to handle entity deletion (called automatically from EntitySystem)
+            * @param pEntity pEntity
+            * @param event event
+            */
+            void OnEntityEvent( IEntity* pEntity, SEntityEvent& event )
+            {
+                if ( event.event == ENTITY_EVENT_DONE )
+                {
+                    this->bEntityListenerInstalled = false;
+                    this->pEntity = NULL;
+                    this->pSoundProxy = NULL;
+                }
+            }
+
+            /**
+            * @brief Set/Initialize all parameters
+            * @param _pEntity Entity this Sound is attached to
+            * @param _vOffset Pos Offset
+            * @param _vDirection Sound Direction
+            * @param _nSoundFlags Sound Flags for FMOD
+            * @param _fVolume Sound Volume
+            * @param _fMinRadius Min Radius sound can be heard from
+            * @param _fMaxRadius Max Radius sound can be heard from
+            * @param _eSemantic Sound Semantic
+            * @return void
+            */
+            void Set( IEntity* _pEntity, Vec3 _vOffset, Vec3 _vDirection, uint32 _nSoundFlags, float _fVolume, float _fMinRadius, float _fMaxRadius, ESoundSemantic _eSemantic );
     };
 
     /**
