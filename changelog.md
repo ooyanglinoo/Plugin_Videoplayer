@@ -10,6 +10,7 @@ New:
 
 Fixes:
 * Now handles entity deletion if sound was playing on entity (possible crash)
+* Don't report empty sounds as errors
 
 Known Limitations:
 * Plugin is partly disabled in 32bit launcher when using DX11

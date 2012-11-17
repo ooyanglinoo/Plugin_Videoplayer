@@ -138,7 +138,6 @@ namespace VideoplayerPlugin
     class CCE3SoundWrapper :
         public ISoundplayer
     {
-
         public:
             CCE3SoundWrapper();
             ~CCE3SoundWrapper();

@@ -116,56 +116,61 @@ namespace VideoplayerPlugin
 
     void SSoundEntity::Resume( const char* sSoundOrEvent, float fPos )
     {
-        if ( pSoundProxy )
+        if ( sSoundOrEvent && *sSoundOrEvent )
         {
-            // first pause the current sound
-            if ( nSoundID != INVALID_SOUNDID )
+            // If not empty
+            if ( pSoundProxy )
             {
-                pSoundProxy->PauseSound( nSoundID, false );
-            }
+                // Soundproxy initialized
+                // first pause the current sound
+                if ( nSoundID != INVALID_SOUNDID )
+                {
+                    pSoundProxy->PauseSound( nSoundID, false );
+                }
 
-            pSound = nSoundID != INVALID_SOUNDID ? pSoundProxy->GetSound( nSoundID ) : NULL;
-
-            if ( !IsSoundPlaying( pSound ) )
-            {
-                // if the current sound is not playing anymore then open the new sound
-#ifndef SDK_VERSION_343
-                nSoundID = pSoundProxy->PlaySoundEx( sSoundOrEvent, vOffset, vDirection, nSoundFlags, fVolume, fMinRadius, fMaxRadius, eSemantic );
-#else
-                nSoundID = pSoundProxy->PlaySoundEx( sSoundOrEvent, vOffset, vDirection, nSoundFlags, 0, fVolume, fMinRadius, fMaxRadius, eSemantic );
-#endif
                 pSound = nSoundID != INVALID_SOUNDID ? pSoundProxy->GetSound( nSoundID ) : NULL;
 
-                if ( !pSound )
+                if ( !IsSoundPlaying( pSound ) )
                 {
-                    // if not successful then try again while also doing some cleanup on the proxy
-                    pSoundProxy->StopAllSounds();
-                    pSoundProxy->UpdateSounds();
-
+                    // if the current sound is not playing anymore then open the new sound
 #ifndef SDK_VERSION_343
                     nSoundID = pSoundProxy->PlaySoundEx( sSoundOrEvent, vOffset, vDirection, nSoundFlags, fVolume, fMinRadius, fMaxRadius, eSemantic );
 #else
                     nSoundID = pSoundProxy->PlaySoundEx( sSoundOrEvent, vOffset, vDirection, nSoundFlags, 0, fVolume, fMinRadius, fMaxRadius, eSemantic );
 #endif
-
                     pSound = nSoundID != INVALID_SOUNDID ? pSoundProxy->GetSound( nSoundID ) : NULL;
-                }
 
-                if ( pSound )
-                {
-                    pSound->GetInterfaceExtended()->SetSoundPriority( MOVIE_SOUND_PRIORITY - 1 ); // 3D sound have lower priority then 2D
-#ifdef SOUNDWRAPPER_PRELOAD
-                    pSound->GetInterfaceExtended()->Preload();
+                    if ( !pSound )
+                    {
+                        // if not successful then try again while also doing some cleanup on the proxy
+                        pSoundProxy->StopAllSounds();
+                        pSoundProxy->UpdateSounds();
+
+#ifndef SDK_VERSION_343
+                        nSoundID = pSoundProxy->PlaySoundEx( sSoundOrEvent, vOffset, vDirection, nSoundFlags, fVolume, fMinRadius, fMaxRadius, eSemantic );
+#else
+                        nSoundID = pSoundProxy->PlaySoundEx( sSoundOrEvent, vOffset, vDirection, nSoundFlags, 0, fVolume, fMinRadius, fMaxRadius, eSemantic );
 #endif
+
+                        pSound = nSoundID != INVALID_SOUNDID ? pSoundProxy->GetSound( nSoundID ) : NULL;
+                    }
+
+                    if ( pSound )
+                    {
+                        pSound->GetInterfaceExtended()->SetSoundPriority( MOVIE_SOUND_PRIORITY - 1 ); // 3D sound have lower priority then 2D
+#ifdef SOUNDWRAPPER_PRELOAD
+                        pSound->GetInterfaceExtended()->Preload();
+#endif
+                    }
                 }
-            }
 
-            Seek( fPos ); // seek to the position requested
+                Seek( fPos ); // seek to the position requested
 
-            // Resume playback
-            if ( nSoundID != INVALID_SOUNDID )
-            {
-                pSoundProxy->PauseSound( nSoundID, false );
+                // Resume playback
+                if ( nSoundID != INVALID_SOUNDID )
+                {
+                    pSoundProxy->PauseSound( nSoundID, false );
+                }
             }
         }
     }
@@ -327,43 +332,47 @@ namespace VideoplayerPlugin
 
     void CCE3SoundWrapper::Resume()
     {
-        if ( m_b2DSoundActive && !m_p2DSound )
+        if ( m_sSoundOrEvent &&  m_sSoundOrEvent.length() )
         {
-            m_p2DSound = gEnv->pSystem->GetISoundSystem()->CreateSound( m_sSoundOrEvent, m_n2DSoundFlags ); // create sound without entity proxy
-
-            if ( m_p2DSound )
+            // If not empty
+            if ( m_b2DSoundActive && !m_p2DSound )
             {
-                m_p2DSound->SetSemantic( eSoundSemantic_HUD );
-                m_p2DSound->GetInterfaceExtended()->SetSoundPriority( MOVIE_SOUND_PRIORITY ); // 2d sound gets highest priority
+                m_p2DSound = gEnv->pSystem->GetISoundSystem()->CreateSound( m_sSoundOrEvent, m_n2DSoundFlags ); // create sound without entity proxy
+
+                if ( m_p2DSound )
+                {
+                    m_p2DSound->SetSemantic( eSoundSemantic_HUD );
+                    m_p2DSound->GetInterfaceExtended()->SetSoundPriority( MOVIE_SOUND_PRIORITY ); // 2d sound gets highest priority
+#ifdef SOUNDWRAPPER_PRELOAD
+                    m_p2DSound->GetInterfaceExtended()->Preload();
+#endif
+                }
+            }
+
+            if ( m_p2DSound && !IsSoundPlaying( m_p2DSound ) )
+            {
+                RefreshMaxDuration( m_p2DSound );
+                m_p2DSound->Play( m_f2DVolume );
+                m_p2DSound->GetInterfaceExtended()->SetCurrentSamplePos( m_pSyncTimesource->GetPosition() * MILLISECOND, true );
 #ifdef SOUNDWRAPPER_PRELOAD
                 m_p2DSound->GetInterfaceExtended()->Preload();
 #endif
+                m_p2DSound->SetPaused( false ); // start playback
+                RefreshMaxDuration( m_p2DSound ); // retrieve duration later it becomes sometimes unreliable
             }
+
+            for ( tEntitySoundProxyMap::iterator iterSound = m_SoundProxies.begin(); iterSound != m_SoundProxies.end(); ++iterSound )
+            {
+                SSoundEntity& se = iterSound->second;
+                se.Resume( m_sSoundOrEvent, m_pSyncTimesource->GetPosition() );
+                RefreshMaxDuration( se.GetSound() );
+            }
+
+            // goto position of sync target
+            Seek( m_pSyncTimesource->GetPosition() );
+
+            m_bPaused = false;
         }
-
-        if ( m_p2DSound && !IsSoundPlaying( m_p2DSound ) )
-        {
-            RefreshMaxDuration( m_p2DSound );
-            m_p2DSound->Play( m_f2DVolume );
-            m_p2DSound->GetInterfaceExtended()->SetCurrentSamplePos( m_pSyncTimesource->GetPosition() * MILLISECOND, true );
-#ifdef SOUNDWRAPPER_PRELOAD
-            m_p2DSound->GetInterfaceExtended()->Preload();
-#endif
-            m_p2DSound->SetPaused( false ); // start playback
-            RefreshMaxDuration( m_p2DSound ); // retrieve duration later it becomes sometimes unreliable
-        }
-
-        for ( tEntitySoundProxyMap::iterator iterSound = m_SoundProxies.begin(); iterSound != m_SoundProxies.end(); ++iterSound )
-        {
-            SSoundEntity& se = iterSound->second;
-            se.Resume( m_sSoundOrEvent, m_pSyncTimesource->GetPosition() );
-            RefreshMaxDuration( se.GetSound() );
-        }
-
-        // goto position of sync target
-        Seek( m_pSyncTimesource->GetPosition() );
-
-        m_bPaused = false;
     }
 
     void CCE3SoundWrapper::Pause()
