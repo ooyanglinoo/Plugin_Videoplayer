@@ -10,7 +10,7 @@
   </Material>
   <Material Name="screenbody" MtlFlags="524416" Shader="Illum" GenMask="100000000" StringGenMask="%TESSELLATION" SurfaceType="mat_plastic" MatTemplate="" Diffuse="0,0,0" Specular="0,0,0" Emissive="0,0,0" Shininess="43" Opacity="1">
    <Textures>
-    <Texture Map="Diffuse" File="../../cryVideodx11/Game/objects/monitors/grey.tif"/>
+    <Texture Map="Diffuse" File="objects/monitors/grey.tif"/>
    </Textures>
    <PublicParams FresnelPower="4" GlossFromDiffuseContrast="1" FresnelScale="1" GlossFromDiffuseOffset="0" FresnelBias="1" GlossFromDiffuseAmount="0" GlossFromDiffuseBrightness="0.333" IndirectColor="0.25,0.25,0.25"/>
   </Material>

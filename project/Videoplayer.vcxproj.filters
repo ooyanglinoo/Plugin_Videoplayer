@@ -40,6 +40,12 @@
     <Filter Include="Tools">
       <UniqueIdentifier>{d02453c6-2d78-490c-8105-893390e01f84}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Installer">
+      <UniqueIdentifier>{123691af-6ac3-4023-bdb2-7fc96efa0111}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="samples">
+      <UniqueIdentifier>{9eb28ce0-2b31-471b-addb-27cafa217452}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\readme.md" />
@@ -54,6 +60,23 @@
     </None>
     <None Include="..\tools\stylecode.bat">
       <Filter>Tools</Filter>
+    </None>
+    <None Include="..\latestredist.info" />
+    <None Include="..\tools\build_installer.bat">
+      <Filter>Installer</Filter>
+    </None>
+    <None Include="..\tools\Videoplayer_Installer.nsi">
+      <Filter>Installer</Filter>
+    </None>
+    <None Include="..\tools\Videoplayer_Installer_Samples.nsi">
+      <Filter>Installer</Filter>
+    </None>
+    <None Include="..\latestsamples.info" />
+    <None Include="..\samples\readme.md">
+      <Filter>samples</Filter>
+    </None>
+    <None Include="..\samples\license.txt">
+      <Filter>samples</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

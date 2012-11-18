@@ -1,5 +1,5 @@
 Sample Level (empty.cry)
-==================================================================================
+========================
 Copyright (c) 2012, Hendrik Polczynski
 
  This work is licensed under a Creative Commons Attribution 3.0 Unported License.
@@ -15,7 +15,7 @@ Copyright (c) 2012, Hendrik Polczynski
    (but not in any way that suggests that they endorse you or your use of the work)
 
 Sample Monitor Assets
-==================================================================================
+=====================
 Copyright (c) 2012, Victor E. Morales
 
  This work is licensed under a Creative Commons Attribution 3.0 Unported License.
@@ -31,7 +31,7 @@ Copyright (c) 2012, Victor E. Morales
    (but not in any way that suggests that they endorse you or your use of the work)
 
 Tears of Steel Teaser
-==================================================================================
+=====================
 Copyright (c) 2012, Blender Foundation | mango.blender.org
 
  This work is licensed under a Creative Commons Attribution 3.0
@@ -47,12 +47,12 @@ Copyright (c) 2012, Blender Foundation | mango.blender.org
    (but not in any way that suggests that they endorse you or your use of the work)
 
 logo_cryengine3.webm
-==================================================================================
+=====================
 © 2012 Crytek GmbH
 CryENGINE and CINEBOX are trademarks or registered trademarks of Crytek GmbH in the U.S. and/or other countries.
 
 logo_gameware.webm
-==================================================================================
+==================
 © Copyright 2012 Autodesk, Inc. All rights reserved
 Autodesk, Beast, HumanIK, Kynapse, and Scaleform are registered trademarks or trademarks of Autodesk, Inc.,
 and/or its subsidiaries and/or affiliates in the USA and/or other countries.
@@ -60,7 +60,7 @@ and/or its subsidiaries and/or affiliates in the USA and/or other countries.
 http://gameware.autodesk.com/scaleform/support/styles
 
 menu_background.webm (Tokyo Skyline)
-==================================================================================
+====================================
 Copyright (c) 2012, Daniel Zwolinski
 
  This work is licensed under a Creative Commons Attribution 3.0
