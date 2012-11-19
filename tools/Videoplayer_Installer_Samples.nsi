@@ -53,7 +53,7 @@ Section "Samples" SEC_SAMPLES
     SectionIn RO
         
     SetOutPath "$INSTDIR\Game"
-    File /r "${FILES_ROOT}\Game"
+    File /r "${FILES_ROOT}\Game\"
 
 	; Standard Code directory also used in git repo
     SetOutPath "$INSTDIR\Code\Plugin_Videoplayer\samples"
