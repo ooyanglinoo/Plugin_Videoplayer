@@ -31,7 +31,7 @@ The plugin manager will automatically load up the plugin when the game/editor is
 
 Users
 -----
-* Extract the files to your CryEngine SDK Folder so that the Code and BinXX/Plugins directory match up.
+* Use the installer or extract the files to your CryEngine SDK Folder so that the Code and BinXX/Plugins directory match up.
 
 Designers
 ---------
